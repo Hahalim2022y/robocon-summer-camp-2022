@@ -57,5 +57,7 @@ int main(void)
 			motor[2].angle + motor[2].numOfTurns * 360.0 / 3591 * 187, motor[2].rpm);
 			uart1_send(buff);
 		}
+		
+		//grayScaleSensor_Send();  //灰度传感器发送数据
 	}
 }
