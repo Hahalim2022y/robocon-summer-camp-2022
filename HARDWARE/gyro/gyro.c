@@ -32,17 +32,17 @@ static enum
     waitForChksum1,
 } rxState = waitForStartByte1;
 
-void gyro_read(void)
-{
-	u8 buff;
-	while(uart2_read(&buff))
-	{
-		if(gyro_unpack(buff))
-		{
-			atkpParsing(&gyroDataFrame);
-		}
-	}
-}
+//void gyro_read(void)
+//{
+//	u8 buff;
+//	while(uart2_read(&buff))
+//	{
+//		if(gyro_unpack(buff))
+//		{
+//			atkpParsing(&gyroDataFrame);
+//		}
+//	}
+//}
 
 uint8_t gyro_unpack(uint8_t ch)
 {
