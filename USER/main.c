@@ -48,6 +48,7 @@ int main(void)
 			//motorSetTargetRpm(&motor[2], 250);
 		}
 		//uart1_send("???");
+		//uart1_send("???");
 		if(time % 80000 == 0)
 		{	
 			sprintf(buff, "%f  %f  |  %f  %f  |  %f  %f\r\n",
