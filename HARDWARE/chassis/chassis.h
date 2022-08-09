@@ -30,6 +30,8 @@ typedef struct _Chassis
 
 extern Chassis chassis;
 
-void chassisSetSpeed(float vx, float vy, float rotatingSpeed);
+void chassisInit(void);
+void chassisAngleRing(void);
+void chassisSetState(float vx, float vy, float targetAngle);
 
 #endif

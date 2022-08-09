@@ -7,6 +7,7 @@
 #include "can.h"
 #include "motor3508.h"
 #include "key.h"
+#include "chassis.h"
 
 int main(void)
 {
@@ -15,10 +16,11 @@ int main(void)
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
 	usart1Init(115200);
 	KEY_Init();
-	//usart2Init(115200);
+	usart2Init(115200);
 	u32 time = 0;
 	motorInit();
 	LEDInit();
+	chassisInit();
 	
 	LED0(1);
 	LED1(1);
@@ -51,10 +53,7 @@ int main(void)
 		//uart1_send("???");
 		if(time % 80000 == 0)
 		{	
-			sprintf(buff, "%f  %f  |  %f  %f  |  %f  %f\r\n",
-			motor[0].angle + motor[0].numOfTurns * 360.0 / 3591 * 187, motor[0].rpm,
-			motor[1].angle + motor[1].numOfTurns * 360.0 / 3591 * 187, motor[1].rpm,
-			motor[2].angle + motor[2].numOfTurns * 360.0 / 3591 * 187, motor[2].rpm);
+			sprintf(buff, "%f\r\n", chassis.angle + 360.0 * chassis.numOfTurns);
 			uart1_send(buff);
 		}
 		

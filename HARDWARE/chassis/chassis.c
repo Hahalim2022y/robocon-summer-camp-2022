@@ -26,7 +26,7 @@ void chassisSetState(float vx, float vy, float targetAngle)
 	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
-void chassisAngleRing()
+void chassisAngleRing(void)
 {
 	//待检查可能有bug
 	while(chassis.targetAngle >= chassis.angle + chassis.numOfTurns * 360.0 + 180) chassis.targetAngle -= 360;
@@ -34,7 +34,7 @@ void chassisAngleRing()
 	chassis.rotatingSpeed = pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
 }
 
-void chassisInit()
+void chassisInit(void)
 {
 	pidInit(&(chassis.AngleRing_pid), 0, 0, 0);
 	chassis.x = 0;
@@ -65,7 +65,7 @@ void USART2_IRQHandler(void)
 			atkpParsing(&gyroDataFrame);
 			if(gyroDataFrame.msgID == UP_ATTITUDE)
 			{
-				chassis.angle = attitude.yaw;
+				chassis.angle = -attitude.yaw;
 				if(chassis.lastAngle == 361) chassis.lastAngle = chassis.angle;
 				if(chassis.angle >= 90 && chassis.lastAngle <= -90)
 				{

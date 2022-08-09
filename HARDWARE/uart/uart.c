@@ -64,7 +64,7 @@ void usart2Init(u32 baud)
 	PA2.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &PA2);
 	
-	//初始化PA10
+	//初始化PA3
 	GPIO_InitTypeDef PA3;
 	PA3.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
 	PA3.GPIO_Pin = GPIO_Pin_3;
