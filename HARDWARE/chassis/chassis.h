@@ -4,7 +4,8 @@
 #include "motor3508.h"
 #include "gyro.h"
 #include "pid.h"
-#include "math.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #define WHEEL_DIAMETER 150
 #define WHEEL_RADIUS 75
@@ -17,16 +18,33 @@
 
 typedef struct _Chassis 
 {
+	//底盘的世界坐标系位置
 	float world_x, world_y;
+	
+	//底盘当前角度
 	float angle;
+	
+	//底盘上一次的角度，只能在USART2_IRQHandler()函数里使用，在其他地方无意义
 	float lastAngle;
+	
 	short numOfTurns;
+	
+	//设定的角度
 	float targetAngle;
+	
+	//设定的平移速度
 	float vx, vy;
-	//平移速度
+	
+	//计算的平移速度
 	float translationSpeed_1, translationSpeed_2, translationSpeed_3;
-	float v1, v2, v3;
+	
+	//计算的旋转速度
 	float rotatingSpeed;
+	
+	//输出给速度环的速度
+	float v1, v2, v3;
+	
+	//角度环pid
 	PidStruct AngleRing_pid;	
 } Chassis;
 

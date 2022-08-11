@@ -50,11 +50,11 @@ int main(void)
 			//motorSetTargetRpm(&motor[2], 250);
 		}
 		//uart1_send("???");
-		//uart1_send("???");
+		uart1_send("???");
 		if(time % 80000 == 0)
 		{	
-			sprintf(buff, "%f\r\n", chassis.angle + 360.0 * chassis.numOfTurns);
-			uart1_send(buff);
+			//sprintf(buff, "%f\r\n", chassis.angle + 360.0 * chassis.numOfTurns);
+			//uart1_send(buff);
 		}
 		
 		//grayScaleSensor_Send();  //灰度传感器发送数据

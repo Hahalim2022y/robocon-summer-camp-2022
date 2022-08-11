@@ -83,47 +83,49 @@ void USART2_IRQHandler(void)
 	}
 }
 
-void position(void)
+void chassisGetPosition(void)
 {
-	float world_x=0,world_y=0,body_x=0,body_y=0;
-	float w=0,vx=0,vy=0;
-	float lastangle1 = motor[0].oriLastAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle2 = motor[1].oriLastAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle3 = motor[2].oriLastAngle / 8191.0 * 360 / 3591 * 187;
-//	float x1 = motor[0].rpm * (motor[0].numOfTurns + motor[0].angle/360) * (WHEEL_DIAMETER * 3.1415) *(1.0/60000);
-//	float x2 = motor[1].rpm * (motor[1].numOfTurns + motor[1].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
-//	float x3 = motor[2].rpm * (motor[2].numOfTurns + motor[2].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
-	float x1 = ((motor[0].absolutAngle - motor[0].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
-	float x2 = ((motor[1].absolutAngle - motor[1].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
-	float x3 = ((motor[2].absolutAngle - motor[2].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
-	float v1 = x1/(1.0/60000);
-	float v2 = x2/(1.0/60000);
-	float v3 = x3/(1.0/60000);
-	//double 
-
+	//每次接收到一个电机的数据都会调用这个函数，但是要三个电机都收到数据才能更新底盘
+	if(motor[0].dataReceived == 0 || motor[1].dataReceived == 0 || motor[2].dataReceived == 0)
+	{
+		return;
+	}
+	
+	//各个值的增量
+	float world_x_increment = 0, world_y_increment = 0, body_x_increment = 0, body_y_increment = 0;
+	
+	//计算得到的速度（与设定的速度不同）
+	float angular_velocity = 0, vx = 0, vy = 0;
+	
+	//各个轮子的位移
+	float x1 = ((motor[0].absolutAngle - motor[0].LastabsolutAngle) / 360) * 2 * 3.14159 * WHEEL_RADIUS;
+	float x2 = ((motor[1].absolutAngle - motor[1].LastabsolutAngle) / 360) * 2 * 3.14159 * WHEEL_RADIUS;
+	float x3 = ((motor[2].absolutAngle - motor[2].LastabsolutAngle) / 360) * 2 * 3.14159 * WHEEL_RADIUS;
 
 //  w为角速度，逆时针为正
 //	v1 = vx * (1/2) - vy * (1.732/2) - w * CHASSIS_RADIUS;
 //	v2 = vx * (1/2) + vy * (1.732/2) - w * CHASSIS_RADIUS;
 //	v3 = -vx - w * CHASSIS_RADIUS;
-	w = -(v1 + v2 + v3) / (3 * CHASSIS_RADIUS);
-	vx = (v1 + v2 - 2*v3) / 3;
-	vy = (-v1 + v2) / 2;
+//	w = -(v1 + v2 + v3) / (3 * CHASSIS_RADIUS);
+//	vx = (v1 + v2 - 2*v3) / 3;
+//	vy = (-v1 + v2) / 2;
 	
-	body_x = (x1 + x2 - 2*x3) / 3;
-	body_y = (-x1 + x2) / 2;
+	body_x_increment = (x1 + x2 - 2 * x3) / 3;
+	body_y_increment = (-x1 + x2) / 2;
 	
-	world_x = body_x * cos(chassis.angle/360 * (2*3.14159)) - body_y * sin(chassis.angle/360 * (2*3.14159));
-	world_y = body_x * sin(chassis.angle/360 * (2*3.14159)) + body_y * cos(chassis.angle/360 * (2*3.14159));
+	world_x_increment= body_x_increment * cos(chassis.angle / 360 * (2 * 3.14159)) 
+						- body_y_increment * sin(chassis.angle / 360 * (2 * 3.14159));
+	world_y_increment = body_x_increment * sin(chassis.angle / 360 * (2 * 3.14159)) 
+						+ body_y_increment * cos(chassis.angle / 360 * (2 * 3.14159));
 	
-	chassis.world_x += world_x;
-	chassis.world_y += world_y;
+	chassis.world_x += world_x_increment;
+	chassis.world_y += world_y_increment;
 
 }
 
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
-  CanRxMsg RxMessage;
+	CanRxMsg RxMessage;
 	u8 i = 0, j = 0;
 	
     CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
@@ -136,6 +138,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	}
 
 	motorGetData(i);
+	chassisGetPosition();
+	//速度环会清零motor[i].dataReceived
 	motorSpeedRing(&motor[i], i);
-	position();
 }
