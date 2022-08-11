@@ -6,6 +6,7 @@
 #include "pid.h"
 
 #define WHEEL_DIAMETER 150
+#define WHEEL_RADIUS 75
 #define CHASSIS_RADIUS 190
 
 //三角形的底边为前
