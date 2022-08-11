@@ -34,5 +34,6 @@ extern Chassis chassis;
 void chassisInit(void);
 void chassisAngleRing(void);
 void chassisSetState(float vx, float vy, float targetAngle);
+void position(void);
 
 #endif

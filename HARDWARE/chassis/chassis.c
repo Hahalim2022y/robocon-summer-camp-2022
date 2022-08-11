@@ -7,12 +7,10 @@ Chassis chassis;
 //转速单位：rpm
 void chassisSetState(float vx, float vy, float targetAngle)
 {
-//	chassis.translationSpeed_1 = (vx * 2 - vy * 1.1547) * 60 / (WHEEL_DIAMETER * 3.1415);
-//	chassis.translationSpeed_2 = (vx * 2 + vy * 1.1547) * 60 / (WHEEL_DIAMETER * 3.1415);
-//	chassis.translationSpeed_3 = vx * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.translationSpeed_1 = (-vx * (1/2) - vy * (1.732/2)) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.translationSpeed_2 = (-vx * (1/2) + vy * (1.732/2)) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.translationSpeed_3 = vx * 60 / (WHEEL_DIAMETER * 3.1415);
+	//把mm/s转换成rpm
+	chassis.translationSpeed_1 = (vx / 2 - vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
+	chassis.translationSpeed_2 = (vx / 2 + vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
+	chassis.translationSpeed_3 = -vx * 60 / (WHEEL_DIAMETER * 3.1415);
 	
 	//                       |  一秒底盘转几圈   |    乘旋转一圈轮子转动距离    |乘60秒|除轮子周长
 	// = 一秒轮子滚多远 * 60 / 轮子周长
@@ -88,30 +86,30 @@ void USART2_IRQHandler(void)
 void position(void)
 {
 	float x=0,y=0,w,vx,vy;
-	float lastangle1=motor[0].oriAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle2=motor[1].oriAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle3=motor[2].oriAngle / 8191.0 * 360 / 3591 * 187;
+	float lastangle1 = motor[0].oriLastAngle / 8191.0 * 360 / 3591 * 187;
+	float lastangle2 = motor[1].oriAngle / 8191.0 * 360 / 3591 * 187;
+	float lastangle3 = motor[2].oriAngle / 8191.0 * 360 / 3591 * 187;
 //	float x1 = motor[0].rpm * (motor[0].numOfTurns + motor[0].angle/360) * (WHEEL_DIAMETER * 3.1415) *(1.0/60000);
 //	float x2 = motor[1].rpm * (motor[1].numOfTurns + motor[1].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
 //	float x3 = motor[2].rpm * (motor[2].numOfTurns + motor[2].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
-	float x1 = ((motor[0].angle-lastangle1)/360) * WHEEL_RADIUS;
-	float x2 = ((motor[1].angle-lastangle2)/360) * WHEEL_RADIUS;
-	float x3 = ((motor[2].angle-lastangle3)/360) * WHEEL_RADIUS;
-	float v1 = x1/(1/60000);
-	float v2 = x2/(1/60000);
-	float v3 = x3/(1/60000);
+	float x1 = ((motor[0].angle - lastangle1) / 360) * WHEEL_RADIUS;
+	float x2 = ((motor[1].angle - lastangle2) / 360) * WHEEL_RADIUS;
+	float x3 = ((motor[2].angle - lastangle3) / 360) * WHEEL_RADIUS;
+	float v1 = x1/(1.0/60000);
+	float v2 = x2/(1.0/60000);
+	float v3 = x3/(1.0/60000);
 //	x = x1 *(1/2) +  (x2 - x1) *(1/2) - x3;
 //	y = - x1 * (1.732/2) + x2*(1.732/2);
 
 //	v1 = -vx * (1/2) - vy * (1.732/2) + w * CHASSIS_RADIUS;
 //	v2 = -vx * (1/2) + vy * (1.732/2) + w * CHASSIS_RADIUS;
 //	v3 = vx + w * CHASSIS_RADIUS;
-	w = (v1+v2+v3)/(2*CHASSIS_RADIUS);
-	vx = (-v1-v2+v3)/2;
-	vy = (-v1+3*v2+v3)/4;
+	w = (v1 + v2 + v3) / (2 * CHASSIS_RADIUS);
+	vx = (-v1 - v2 + v3) / 2;
+	vy = (-v1 + 3 * v2 + v3) / 4;
 	
 
-	lastangle1=motor[0].angle;
-	lastangle2=motor[1].angle;
-	lastangle3=motor[2].angle;
+//	lastangle1 = motor[0].angle;
+//	lastangle2 = motor[1].angle;
+//	lastangle3 = motor[2].angle;
 }
