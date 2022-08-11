@@ -38,8 +38,8 @@ void chassisAngleRing(void)
 void chassisInit(void)
 {
 	pidInit(&(chassis.AngleRing_pid), 0, 0, 0);
-	chassis.x = 0;
-	chassis.y = 0;
+	chassis.world_x = 0;
+	chassis.world_y = 0;
 	chassis.angle = 0;
 	chassis.lastAngle = 361;
 	chassis.numOfTurns = 0;
@@ -85,31 +85,57 @@ void USART2_IRQHandler(void)
 
 void position(void)
 {
-	float x=0,y=0,w,vx,vy;
+	float world_x=0,world_y=0,body_x=0,body_y=0;
+	float w=0,vx=0,vy=0;
 	float lastangle1 = motor[0].oriLastAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle2 = motor[1].oriAngle / 8191.0 * 360 / 3591 * 187;
-	float lastangle3 = motor[2].oriAngle / 8191.0 * 360 / 3591 * 187;
+	float lastangle2 = motor[1].oriLastAngle / 8191.0 * 360 / 3591 * 187;
+	float lastangle3 = motor[2].oriLastAngle / 8191.0 * 360 / 3591 * 187;
 //	float x1 = motor[0].rpm * (motor[0].numOfTurns + motor[0].angle/360) * (WHEEL_DIAMETER * 3.1415) *(1.0/60000);
 //	float x2 = motor[1].rpm * (motor[1].numOfTurns + motor[1].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
 //	float x3 = motor[2].rpm * (motor[2].numOfTurns + motor[2].angle/360) * (WHEEL_DIAMETER * 3.1415)*(1.0/60000);
-	float x1 = ((motor[0].angle - lastangle1) / 360) * WHEEL_RADIUS;
-	float x2 = ((motor[1].angle - lastangle2) / 360) * WHEEL_RADIUS;
-	float x3 = ((motor[2].angle - lastangle3) / 360) * WHEEL_RADIUS;
+	float x1 = ((motor[0].absolutAngle - motor[0].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
+	float x2 = ((motor[1].absolutAngle - motor[1].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
+	float x3 = ((motor[2].absolutAngle - motor[2].LastabsolutAngle) / 360)* 2 * 3.14159 * WHEEL_RADIUS;
 	float v1 = x1/(1.0/60000);
 	float v2 = x2/(1.0/60000);
 	float v3 = x3/(1.0/60000);
-//	x = x1 *(1/2) +  (x2 - x1) *(1/2) - x3;
-//	y = - x1 * (1.732/2) + x2*(1.732/2);
+	//double 
 
-//	v1 = -vx * (1/2) - vy * (1.732/2) + w * CHASSIS_RADIUS;
-//	v2 = -vx * (1/2) + vy * (1.732/2) + w * CHASSIS_RADIUS;
-//	v3 = vx + w * CHASSIS_RADIUS;
-	w = (v1 + v2 + v3) / (2 * CHASSIS_RADIUS);
-	vx = (-v1 - v2 + v3) / 2;
-	vy = (-v1 + 3 * v2 + v3) / 4;
+
+//  w为角速度，逆时针为正
+//	v1 = vx * (1/2) - vy * (1.732/2) - w * CHASSIS_RADIUS;
+//	v2 = vx * (1/2) + vy * (1.732/2) - w * CHASSIS_RADIUS;
+//	v3 = -vx - w * CHASSIS_RADIUS;
+	w = -(v1 + v2 + v3) / (3 * CHASSIS_RADIUS);
+	vx = (v1 + v2 - 2*v3) / 3;
+	vy = (-v1 + v2) / 2;
 	
+	body_x = (x1 + x2 - 2*x3) / 3;
+	body_y = (-x1 + x2) / 2;
+	
+	world_x = body_x * cos(chassis.angle/360 * (2*3.14159)) - body_y * sin(chassis.angle/360 * (2*3.14159));
+	world_y = body_x * sin(chassis.angle/360 * (2*3.14159)) + body_y * cos(chassis.angle/360 * (2*3.14159));
+	
+	chassis.world_x += world_x;
+	chassis.world_y += world_y;
 
-//	lastangle1 = motor[0].angle;
-//	lastangle2 = motor[1].angle;
-//	lastangle3 = motor[2].angle;
+}
+
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+  CanRxMsg RxMessage;
+	u8 i = 0, j = 0;
+	
+    CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
+	
+	i = RxMessage.StdId - 0x201;
+	
+	for(j = 0; j < 8; j++)
+	{
+		can_motor_receive_databuff[i][j] = RxMessage.Data[j];
+	}
+
+	motorGetData(i);
+	motorSpeedRing(&motor[i], i);
+	position();
 }

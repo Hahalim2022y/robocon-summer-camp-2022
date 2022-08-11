@@ -53,6 +53,8 @@ void motorInit(void)
 	{
 		motor[i].oriAngle = 0;
 		motor[i].oriLastAngle = 0xffff;
+		motor[i].absolutAngle = 0;
+		motor[i].LastabsolutAngle = 0;
 		motor[i].oriRpm = 0;
 		motor[i].numOfTurns = 0;
 		motor[i].angle = 0;
@@ -82,6 +84,9 @@ void motorGetData(u8 i)
 	motor[i].angle = motor[i].oriAngle / 8191.0 * 360 / 3591 * 187;
 	motor[i].oriLastAngle = motor[i].oriAngle;
 
+	motor[i].LastabsolutAngle = motor[i].absolutAngle;	
+	motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].oriAngle;
+
 	
 	motor[i].oriRpm = 0;
 	motor[i].oriRpm = motor[i].oriRpm | (can_motor_receive_databuff[i][2] << 8);
@@ -91,20 +96,4 @@ void motorGetData(u8 i)
 	motor[i].dataReceived = 1;
 }
 
-void USB_LP_CAN1_RX0_IRQHandler(void)
-{
-  	CanRxMsg RxMessage;
-	u8 i = 0, j = 0;
-	
-    CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	
-	i = RxMessage.StdId - 0x201;
-	
-	for(j = 0; j < 8; j++)
-	{
-		can_motor_receive_databuff[i][j] = RxMessage.Data[j];
-	}
 
-	motorGetData(i);
-	motorSpeedRing(&motor[i], i);
-}

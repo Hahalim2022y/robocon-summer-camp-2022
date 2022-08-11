@@ -8,6 +8,8 @@
 typedef struct Motor3508_
 {
 	short numOfTurns;
+	float absolutAngle;
+	float LastabsolutAngle;
 	u16 oriAngle;
 	u16 oriLastAngle;
 	float angle;

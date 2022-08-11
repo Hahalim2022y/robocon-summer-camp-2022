@@ -4,6 +4,7 @@
 #include "motor3508.h"
 #include "gyro.h"
 #include "pid.h"
+#include "math.h"
 
 #define WHEEL_DIAMETER 150
 #define WHEEL_RADIUS 75
@@ -16,7 +17,7 @@
 
 typedef struct _Chassis 
 {
-	float x, y;
+	float world_x, world_y;
 	float angle;
 	float lastAngle;
 	short numOfTurns;
@@ -35,5 +36,6 @@ void chassisInit(void);
 void chassisAngleRing(void);
 void chassisSetState(float vx, float vy, float targetAngle);
 void position(void);
+
 
 #endif
