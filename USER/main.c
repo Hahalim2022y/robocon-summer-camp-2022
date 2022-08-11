@@ -21,6 +21,7 @@ int main(void)
 	motorInit();
 	LEDInit();
 	chassisInit();
+	//grayScaleSensor2_Init();
 	
 	LED0(1);
 	LED1(1);
@@ -50,13 +51,15 @@ int main(void)
 			//motorSetTargetRpm(&motor[2], 250);
 		}
 		//uart1_send("???");
-		uart1_send("???");
+		//uart1_send("???");
 		if(time % 80000 == 0)
 		{	
+			//grayScaleSensor_Send();  //灰度传感器发送数据
+			//grayScaleSensor2_Send();
 			//sprintf(buff, "%f\r\n", chassis.angle + 360.0 * chassis.numOfTurns);
 			//uart1_send(buff);
 		}
 		
-		//grayScaleSensor_Send();  //灰度传感器发送数据
+		
 	}
 }
