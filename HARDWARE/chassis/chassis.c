@@ -95,7 +95,7 @@ void chassisGetPosition(void)
 	float world_x_increment = 0, world_y_increment = 0, body_x_increment = 0, body_y_increment = 0;
 	
 	//计算得到的速度（与设定的速度不同）
-	float angular_velocity = 0, vx = 0, vy = 0;
+	//float angular_velocity = 0, vx = 0, vy = 0;
 	
 	//各个轮子的位移
 	float x1 = ((motor[0].absolutAngle - motor[0].LastabsolutAngle) / 360) * 2 * 3.14159 * WHEEL_RADIUS;
@@ -140,5 +140,5 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	motorGetData(i);
 	chassisGetPosition();
 	//速度环会清零motor[i].dataReceived
-	motorSpeedRing(&motor[i], i);
+	motorSpeedRing(i);
 }

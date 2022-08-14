@@ -4,7 +4,6 @@
 #include "motor3508.h"
 #include "gyro.h"
 #include "pid.h"
-#define _USE_MATH_DEFINES
 #include <math.h>
 
 #define WHEEL_DIAMETER 150
@@ -53,7 +52,7 @@ extern Chassis chassis;
 void chassisInit(void);
 void chassisAngleRing(void);
 void chassisSetState(float vx, float vy, float targetAngle);
-void position(void);
+void chassisGetPosition(void);
 
 
 #endif

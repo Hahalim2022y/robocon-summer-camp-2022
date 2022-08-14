@@ -2,64 +2,85 @@
 #include "LED.h"
 #include "grayScaleSensor.h"
 #include "gyro.h"
-#include <stdio.h>
+#include <string.h>
 #include "uart.h"
 #include "can.h"
 #include "motor3508.h"
 #include "key.h"
 #include "chassis.h"
+#include "cycleArray.h"
 
 int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-	char buff[100];
+	u8 res;
+	char command[100];
+	u8 commandCnt = 0;
+	u8 commandFinish = 0;
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
-	usart1Init(115200);
-	KEY_Init();
-	usart2Init(115200);
-	u32 time = 0;
+	//KEY_Init();
+	//usart2Init(115200);
+	//u32 time = 0;
 	motorInit();
-	LEDInit();
-	chassisInit();
+	//LEDInit();
+	//chassisInit();
 	//grayScaleSensor2_Init();
+	
+	usart1Init(115200);
+	uart4Init(115200);
 	
 	LED0(1);
 	LED1(1);
 	
 	while(1)
 	{
-		time++;
-		if(KEY0 == 0)
+		//uart1_send("123");
+		//uart4_send("123");
+		while(1)
 		{
-			LED0(0);
-			LED1(1);
-			//motorSetTargetRpm(&motor[0], 250);
-			motorSetTargetRpm(&motor[0], 0);
-			motorSetTargetRpm(&motor[1], 0);
-			motorSetTargetRpm(&motor[2], 0);
+			if(uart4_read(&res) == 1)
+			{
+				if(res != '\n')
+				{
+					command[commandCnt] = res;
+				}
+				else
+				{
+					command[commandCnt] = '\0';
+					commandFinish = 1;
+					commandCnt = 0;
+					break;
+				}
+			}
+			else
+			{
+				break;
+			}
+			commandCnt++;
 		}
-		if(KEY1 == 0)
+		if(commandFinish == 1)
 		{
-			LED0(1);
-			LED1(0);
-			motorSetTargetRpm(&motor[0], 60);
-			motorSetTargetRpm(&motor[1], 60);
-			motorSetTargetRpm(&motor[2], 60);
+			if(strcmp(command, "W") == 0)
+			{
+				motorSetTargetRpm(&motor[1], 60);
+				motorSetTargetRpm(&motor[2], 60);
+				motorSetTargetRpm(&motor[0], 60);
+			}
+			else if(strcmp(command, "S") == 0)
+			{
+				motorSetTargetRpm(&motor[1], -60);
+				motorSetTargetRpm(&motor[2], -60);
+				motorSetTargetRpm(&motor[0], -60);
+			}
+			else
+			{
+				motorSetTargetRpm(&motor[1], 0);
+				motorSetTargetRpm(&motor[2], 0);
+				motorSetTargetRpm(&motor[0], 0);
+			}
+			uart4_send(command);
+			uart4_send("\n");
+			commandFinish = 0;
 		}
-		if(WKUP_PRES == 0)
-		{
-			//motorSetTargetRpm(&motor[2], 250);
-		}
-		//uart1_send("???");
-		//uart1_send("???");
-		if(time % 80000 == 0)
-		{	
-			//grayScaleSensor_Send();  //灰度传感器发送数据
-			//grayScaleSensor2_Send();
-			//sprintf(buff, "%f\r\n", chassis.angle + 360.0 * chassis.numOfTurns);
-			//uart1_send(buff);
-		}
-		
-		
 	}
 }

@@ -1,17 +1,18 @@
 #include "motor3508.h"
+#include "uart.h"
 
 Motor3508 motor[3];
-Motor3508 lalala;
 
-void motorSpeedRing(Motor3508 *motor, u8 id)
+void motorSpeedRing(u8 id)
 {
 	long targetCurrent;
-	targetCurrent = (long)pidOutput(&(motor->pid), motor->targetRpm, motor->rpm);
+	targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].targetRpm, motor[id].rpm);
 	if(targetCurrent < -16384) targetCurrent = -16384;
 	if(targetCurrent > 16384) targetCurrent = 16384;
 	can_motor_send_databuff[0 + id * 2] = targetCurrent >> 8;
 	can_motor_send_databuff[1 + id * 2] = targetCurrent;
-	if(motor[0].dataReceived && motor[0].dataReceived && motor[0].dataReceived)
+	
+	if(motor[0].dataReceived == 1 && motor[1].dataReceived == 1 && motor[2].dataReceived == 1)
 	{
 		motorSendCurrent();
 		motor[0].dataReceived = 0;
