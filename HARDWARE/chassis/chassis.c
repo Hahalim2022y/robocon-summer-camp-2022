@@ -32,12 +32,20 @@ void chassisAngleRing(void)
 	//待检查可能有bug
 	while(chassis.targetAngle >= chassis.angle + chassis.numOfTurns * 360.0 + 180) chassis.targetAngle -= 360;
 	while(chassis.targetAngle < chassis.angle + chassis.numOfTurns * 360.0 - 180) chassis.targetAngle += 360;
-	chassis.rotatingSpeed = pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
+	chassis.rotatingSpeed = -pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
+	
+	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
+	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
+	chassis.v3 = chassis.translationSpeed_3 + chassis.rotatingSpeed;
+	
+	motorSetTargetRpm(&motor[0], chassis.v1);
+	motorSetTargetRpm(&motor[1], chassis.v2);
+	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
 void chassisInit(void)
 {
-	pidInit(&(chassis.AngleRing_pid), 0, 0, 0);
+	pidInit(&(chassis.AngleRing_pid), 0.5, 0, 0);
 	chassis.world_x = 0;
 	chassis.world_y = 0;
 	chassis.angle = 0;

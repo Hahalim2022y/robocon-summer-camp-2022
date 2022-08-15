@@ -69,7 +69,7 @@ void can_init(u8 tsjw,u8 tbs2,u8 tbs1,u16 brp,u8 mode)
 	CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);//FIFO0有消息中断允许.		    
   
   	NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;     // 主优先级为1
+  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;     // 主优先级为1
   	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;            // 次优先级为0
   	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   	NVIC_Init(&NVIC_InitStructure);

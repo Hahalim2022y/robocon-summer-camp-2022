@@ -36,6 +36,11 @@ int main(void)
 	int speed = 0;
 	float angle = 0;
 	
+	chassis.angleBias = -attitude.yaw;
+	chassis.angle = 0;
+	chassis.lastAngle = 361;
+	chassis.numOfTurns = 0;
+	
 	while(1)
 	{
 		//uart1_send("123");

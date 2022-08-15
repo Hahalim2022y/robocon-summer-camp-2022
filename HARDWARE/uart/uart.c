@@ -67,6 +67,7 @@ void usart2Init(u32 baud)
 	//初始化PA3
 	GPIO_InitTypeDef PA3;
 	PA3.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
+//PA3.GPIO_Mode = GPIO_Mode_IPD;
 	PA3.GPIO_Pin = GPIO_Pin_3;
 	PA3.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &PA3);
@@ -75,7 +76,7 @@ void usart2Init(u32 baud)
 	NVIC_InitTypeDef NVIC_USART2;
 	NVIC_USART2.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_USART2.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_USART2.NVIC_IRQChannelPreemptionPriority = 3; //抢占优先级
+	NVIC_USART2.NVIC_IRQChannelPreemptionPriority = 2; //抢占优先级
 	NVIC_USART2.NVIC_IRQChannelSubPriority = 0; //响应优先级
 	NVIC_Init(&NVIC_USART2);
 	
@@ -122,7 +123,7 @@ void uart4Init(u32 baud)
 	NVIC_InitTypeDef NVIC_UART4;
 	NVIC_UART4.NVIC_IRQChannel = UART4_IRQn;
 	NVIC_UART4.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_UART4.NVIC_IRQChannelPreemptionPriority = 4; //抢占优先级
+	NVIC_UART4.NVIC_IRQChannelPreemptionPriority = 1; //抢占优先级
 	NVIC_UART4.NVIC_IRQChannelSubPriority = 0; //响应优先级
 	NVIC_Init(&NVIC_UART4);
 	
