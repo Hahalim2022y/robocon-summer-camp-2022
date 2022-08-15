@@ -1,5 +1,6 @@
 #include "grayScaleSensor.h"
 
+//第一个灰度传感器，夏令营物资
 void grayScaleSensor_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -59,3 +60,89 @@ void grayScaleSensor_Send(void)
 
 }
 
+//第二个灰度传感器，智能车队
+void grayScaleSensor2_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);												   
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5| GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;   
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOF, ENABLE);												   
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 |GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 ;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;   
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(GPIOF, &GPIO_InitStructure);
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);												   
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;   
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	
+
+}
+
+u8 grayScaleSensor2_Read_up(void)
+{
+	u8 res = 0x00;
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_4) << 5);
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_2) << 4);
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_0) << 3);
+	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_6) << 2);
+	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) << 1);
+	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) << 0);
+//	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) << 0);
+	
+	return res;
+}
+u8 grayScaleSensor2_Read_down(void)
+{
+	u8 res = 0x00;
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_5) << 5);
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_3) << 4);
+	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_1) << 3);
+	res += (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13) << 2);
+	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5) << 1);
+	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3) << 0);
+
+	
+	return res;
+}
+
+void grayScaleSensor2_Send(void)
+{
+	u8 gray_up,gray_down;
+	u16 i;
+	gray_up = grayScaleSensor2_Read_up();
+			for(i = 0; i < 6; i++)
+			{
+				if(gray_up & (1 << (5-i)))
+				{
+					uart1_send("1 ");
+				}
+				else
+				{
+					uart1_send("0 ");
+				}
+			}
+			uart1_send("\r\n");
+			gray_down = grayScaleSensor2_Read_down();
+			for(i = 0; i < 6; i++)
+			{
+				if(gray_down & (1 << (5-i)))
+				{
+					uart1_send("1 ");
+				}
+				else
+				{
+					uart1_send("0 ");
+				}
+			}
+			uart1_send("\r\n");
+			uart1_send("\r\n");
+
+}

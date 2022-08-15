@@ -1,17 +1,18 @@
 #include "motor3508.h"
+#include "uart.h"
 
 Motor3508 motor[3];
-Motor3508 lalala;
 
-void motorSpeedRing(Motor3508 *motor, u8 id)
+void motorSpeedRing(u8 id)
 {
 	long targetCurrent;
-	targetCurrent = (long)pidOutput(&(motor->pid), motor->targetRpm, motor->rpm);
+	targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].targetRpm, motor[id].rpm);
 	if(targetCurrent < -16384) targetCurrent = -16384;
 	if(targetCurrent > 16384) targetCurrent = 16384;
 	can_motor_send_databuff[0 + id * 2] = targetCurrent >> 8;
 	can_motor_send_databuff[1 + id * 2] = targetCurrent;
-	if(motor[0].dataReceived && motor[0].dataReceived && motor[0].dataReceived)
+	
+	if(motor[0].dataReceived == 1 && motor[1].dataReceived == 1 && motor[2].dataReceived == 1)
 	{
 		motorSendCurrent();
 		motor[0].dataReceived = 0;
@@ -53,6 +54,8 @@ void motorInit(void)
 	{
 		motor[i].oriAngle = 0;
 		motor[i].oriLastAngle = 0xffff;
+		motor[i].absolutAngle = 0;
+		motor[i].LastabsolutAngle = 0;
 		motor[i].oriRpm = 0;
 		motor[i].numOfTurns = 0;
 		motor[i].angle = 0;
@@ -82,6 +85,9 @@ void motorGetData(u8 i)
 	motor[i].angle = motor[i].oriAngle / 8191.0 * 360 / 3591 * 187;
 	motor[i].oriLastAngle = motor[i].oriAngle;
 
+	motor[i].LastabsolutAngle = motor[i].absolutAngle;	
+	motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].oriAngle;
+
 	
 	motor[i].oriRpm = 0;
 	motor[i].oriRpm = motor[i].oriRpm | (can_motor_receive_databuff[i][2] << 8);
@@ -91,20 +97,4 @@ void motorGetData(u8 i)
 	motor[i].dataReceived = 1;
 }
 
-void USB_LP_CAN1_RX0_IRQHandler(void)
-{
-  	CanRxMsg RxMessage;
-	u8 i = 0, j = 0;
-	
-    CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
-	
-	i = RxMessage.StdId - 0x201;
-	
-	for(j = 0; j < 8; j++)
-	{
-		can_motor_receive_databuff[i][j] = RxMessage.Data[j];
-	}
 
-	motorGetData(i);
-	motorSpeedRing(&motor[i], i);
-}
