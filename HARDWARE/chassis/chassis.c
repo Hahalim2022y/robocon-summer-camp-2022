@@ -41,6 +41,7 @@ void chassisInit(void)
 	chassis.world_x = 0;
 	chassis.world_y = 0;
 	chassis.angle = 0;
+	chassis.angleBias = 0;
 	chassis.lastAngle = 361;
 	chassis.numOfTurns = 0;
 	chassis.targetAngle = 0;
@@ -66,7 +67,8 @@ void USART2_IRQHandler(void)
 			atkpParsing(&gyroDataFrame);
 			if(gyroDataFrame.msgID == UP_ATTITUDE)
 			{
-				chassis.angle = -attitude.yaw;
+				//chassis.angle = -attitude.yaw;
+				chassis.angle = -attitude.yaw - chassis.angleBias;
 				if(chassis.lastAngle == 361) chassis.lastAngle = chassis.angle;
 				if(chassis.angle >= 90 && chassis.lastAngle <= -90)
 				{

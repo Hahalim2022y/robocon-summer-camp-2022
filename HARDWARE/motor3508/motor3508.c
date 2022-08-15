@@ -61,7 +61,7 @@ void motorInit(void)
 		motor[i].angle = 0;
 		motor[i].rpm = 0;
 		motor[i].dataReceived = 0;
-		pidInit(&motor[i].pid, 100, 0.3, 10);
+		pidInit(&motor[i].pid, 20, 0.2, 400);
 	}
 }
 

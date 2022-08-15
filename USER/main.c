@@ -3,6 +3,7 @@
 #include "grayScaleSensor.h"
 #include "gyro.h"
 #include <string.h>
+#include <stdlib.h>
 #include "uart.h"
 #include "can.h"
 #include "motor3508.h"
@@ -19,18 +20,21 @@ int main(void)
 	u8 commandFinish = 0;
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
 	//KEY_Init();
-	//usart2Init(115200);
+	usart2Init(115200);
 	//u32 time = 0;
 	motorInit();
 	//LEDInit();
-	//chassisInit();
+	chassisInit();
 	//grayScaleSensor2_Init();
 	
 	usart1Init(115200);
 	uart4Init(115200);
 	
-	LED0(1);
-	LED1(1);
+	LED0(0);
+	LED1(0);
+	
+	int speed = 0;
+	float angle = 0;
 	
 	while(1)
 	{
@@ -62,15 +66,35 @@ int main(void)
 		{
 			if(strcmp(command, "W") == 0)
 			{
-				motorSetTargetRpm(&motor[1], 60);
-				motorSetTargetRpm(&motor[2], 60);
-				motorSetTargetRpm(&motor[0], 60);
+				chassisSetState(0, speed, 0);
 			}
 			else if(strcmp(command, "S") == 0)
 			{
-				motorSetTargetRpm(&motor[1], -60);
-				motorSetTargetRpm(&motor[2], -60);
-				motorSetTargetRpm(&motor[0], -60);
+				chassisSetState(0, -speed, 0);
+			}
+			else if(strcmp(command, "A") == 0)
+			{
+				chassisSetState(-speed, 0, 0);
+			}
+			else if(strcmp(command, "D") == 0)
+			{
+				chassisSetState(speed, 0, 0);
+			}
+			else if(strcmp(command, "reset") == 0)
+			{
+				chassis.angleBias = -attitude.yaw;
+				chassis.angle = 0;
+				chassis.lastAngle = 361;
+				chassis.numOfTurns = 0;
+			}
+			else if(strstr(command, "speed") != NULL)
+			{
+				speed = atoi(command + 5);
+			}
+			else if(strstr(command, "angle") != NULL)
+			{
+				angle = atof(command + 5);
+				chassisSetState(0, 0, angle);
 			}
 			else
 			{
