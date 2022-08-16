@@ -115,6 +115,11 @@ int main(void)
 				angle = atof(command + 5);
 				chassisSetState(0, 0, angle);
 			}
+			else if(strcmp(command, "xy") == 0)
+			{
+				sprintf(buff, "%f , %f\n", chassis.world_x, chassis.world_y);
+				uart4_send(buff);
+			}
 			else
 			{
 				chassisSetState(0, 0, angle);
