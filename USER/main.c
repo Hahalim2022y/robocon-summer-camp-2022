@@ -100,6 +100,9 @@ int main(void)
 				chassis.angle = 0;
 				chassis.lastAngle = 361;
 				chassis.numOfTurns = 0;
+				chassis.targetAngle =0;
+				chassis.world_x = 0;
+				chassis.world_y = 0;
 			}
 			else if(strstr(command, "speed") != NULL)
 			{
@@ -117,7 +120,7 @@ int main(void)
 			}
 			else if(strcmp(command, "xy") == 0)
 			{
-				sprintf(buff, "%f , %f\n", chassis.world_x, chassis.world_y);
+				sprintf(buff, "%f , %f\n", chassis.world_x * 1.0175 + 114.55, chassis.world_y * 1.0175 + 114.55);
 				uart4_send(buff);
 			}
 			else

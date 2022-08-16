@@ -37,7 +37,21 @@ void chassisAngleRing(void)
 {
 	while(chassis.targetAngle >= chassis.angle + chassis.numOfTurns * 360.0 + 180) chassis.targetAngle -= 360;
 	while(chassis.targetAngle < chassis.angle + chassis.numOfTurns * 360.0 - 180) chassis.targetAngle += 360;
-	chassis.rotatingSpeed = -pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
+	
+	if(chassis.smoothTargetAngle < chassis.targetAngle - 0.8)
+	{
+		chassis.smoothTargetAngle += 0.8;
+	}
+	else if(chassis.smoothTargetAngle > chassis.targetAngle + 0.8)
+	{
+		chassis.smoothTargetAngle -= 0.8;
+	}
+	else
+	{
+		chassis.smoothTargetAngle = chassis.targetAngle;
+	}
+	
+	chassis.rotatingSpeed = -pidOutput(&(chassis.AngleRing_pid), chassis.smoothTargetAngle, chassis.angle + chassis.numOfTurns * 360.0);
 	
 	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
 	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
@@ -50,7 +64,7 @@ void chassisAngleRing(void)
 
 void chassisInit(void)
 {
-	pidInit(&(chassis.AngleRing_pid), 0.45, 0.00012, 10.0);
+	pidInit(&(chassis.AngleRing_pid), 2.2, 0.0003, 100.0);// 0.45, 0.00012, 10.0
 	chassis.world_x = 0;
 	chassis.world_y = 0;
 	chassis.angle = 0;
@@ -123,15 +137,15 @@ void chassisGetPosition(void)
 //	v3 = -vx - w * CHASSIS_RADIUS;
 //	w = -(v1 + v2 + v3) / (3 * CHASSIS_RADIUS);
 //	vx = (v1 + v2 - 2*v3) / 3;
-//	vy = (-v1 + v2) / 2;
+//	vy = (-v1 + v2) /  1.732;
 	
 	body_x_increment = (x1 + x2 - 2 * x3) / 3;
-	body_y_increment = (-x1 + x2) / 2;
+	body_y_increment = (-x1 + x2) / 1.732;
 	
-	world_x_increment= body_x_increment * cos(chassis.angle / 360 * (2 * 3.14159)) 
-						- body_y_increment * sin(chassis.angle / 360 * (2 * 3.14159));
-	world_y_increment = body_x_increment * sin(chassis.angle / 360 * (2 * 3.14159)) 
-						+ body_y_increment * cos(chassis.angle / 360 * (2 * 3.14159));
+	world_x_increment= body_x_increment * cos(chassis.angle  * (2 * 3.14159)/ 360) 
+						- body_y_increment * sin(chassis.angle  * (2 * 3.14159)/ 360);
+	world_y_increment = body_x_increment * sin(chassis.angle  * (2 * 3.14159)/ 360) 
+						+ body_y_increment * cos(chassis.angle  * (2 * 3.14159)/ 360);
 	
 	chassis.world_x += world_x_increment;
 	chassis.world_y += world_y_increment;

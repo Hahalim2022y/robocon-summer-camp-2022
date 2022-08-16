@@ -31,6 +31,7 @@ typedef struct _Chassis
 	
 	//设定的角度
 	float targetAngle;
+	float smoothTargetAngle;
 	
 	//设定的平移速度
 	float vx, vy;
