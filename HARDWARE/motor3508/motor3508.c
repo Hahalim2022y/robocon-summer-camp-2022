@@ -6,7 +6,18 @@ Motor3508 motor[3];
 void motorSpeedRing(u8 id)
 {
 	long targetCurrent;
-	targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].targetRpm, motor[id].rpm);
+	if(motor[id].targetRpm > motor[id].rpm + 0.0005)
+	{
+		targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].rpm + 0.0005, motor[id].rpm);
+	}
+	else if(motor[id].targetRpm < motor[id].rpm - 0.0005)
+	{
+		targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].rpm - 0.0005, motor[id].rpm);
+	}
+	else
+	{
+		targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].targetRpm, motor[id].rpm);
+	}
 	if(targetCurrent < -16384) targetCurrent = -16384;
 	if(targetCurrent > 16384) targetCurrent = 16384;
 	can_motor_send_databuff[0 + id * 2] = targetCurrent >> 8;
