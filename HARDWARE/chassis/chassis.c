@@ -7,10 +7,16 @@ Chassis chassis;
 //转速单位：rpm
 void chassisSetState(float vx, float vy, float targetAngle)
 {
-	//把mm/s转换成rpm
-	chassis.translationSpeed_1 = (vx / 2 - vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.translationSpeed_2 = (vx / 2 + vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.translationSpeed_3 = -vx * 60 / (WHEEL_DIAMETER * 3.1415);
+	float body_vx, body_vy;
+	body_vx = vx * cos(-chassis.angle / 360 * (2 * 3.14159)) 
+						- vy * sin(-chassis.angle / 360 * (2 * 3.14159));
+	body_vy = vx * sin(-chassis.angle / 360 * (2 * 3.14159)) 
+						+ vy * cos(-chassis.angle / 360 * (2 * 3.14159));
+	
+	//把mm/s转换成rpm	
+	chassis.translationSpeed_1 = (body_vx / 2 - body_vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
+	chassis.translationSpeed_2 = (body_vx / 2 + body_vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
+	chassis.translationSpeed_3 = -body_vx * 60 / (WHEEL_DIAMETER * 3.1415);
 	
 	//                       |  一秒底盘转几圈   |    乘旋转一圈轮子转动距离    |乘60秒|除轮子周长
 	// = 一秒轮子滚多远 * 60 / 轮子周长
@@ -29,18 +35,26 @@ void chassisSetState(float vx, float vy, float targetAngle)
 
 void chassisAngleRing(void)
 {
-	//待检查可能有bug
 	while(chassis.targetAngle >= chassis.angle + chassis.numOfTurns * 360.0 + 180) chassis.targetAngle -= 360;
 	while(chassis.targetAngle < chassis.angle + chassis.numOfTurns * 360.0 - 180) chassis.targetAngle += 360;
-	chassis.rotatingSpeed = pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
+	chassis.rotatingSpeed = -pidOutput(&(chassis.AngleRing_pid), chassis.targetAngle, chassis.angle + chassis.numOfTurns * 360.0);
+	
+	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
+	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
+	chassis.v3 = chassis.translationSpeed_3 + chassis.rotatingSpeed;
+	
+	motorSetTargetRpm(&motor[0], chassis.v1);
+	motorSetTargetRpm(&motor[1], chassis.v2);
+	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
 void chassisInit(void)
 {
-	pidInit(&(chassis.AngleRing_pid), 0, 0, 0);
+	pidInit(&(chassis.AngleRing_pid), 0.45, 0.00012, 10.0);
 	chassis.world_x = 0;
 	chassis.world_y = 0;
 	chassis.angle = 0;
+	chassis.angleBias = 0;
 	chassis.lastAngle = 361;
 	chassis.numOfTurns = 0;
 	chassis.targetAngle = 0;
@@ -66,7 +80,8 @@ void USART2_IRQHandler(void)
 			atkpParsing(&gyroDataFrame);
 			if(gyroDataFrame.msgID == UP_ATTITUDE)
 			{
-				chassis.angle = -attitude.yaw;
+				//chassis.angle = -attitude.yaw;
+				chassis.angle = attitude.yaw - chassis.angleBias;
 				if(chassis.lastAngle == 361) chassis.lastAngle = chassis.angle;
 				if(chassis.angle >= 90 && chassis.lastAngle <= -90)
 				{

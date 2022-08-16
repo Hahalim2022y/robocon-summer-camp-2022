@@ -22,6 +22,7 @@ typedef struct _Chassis
 	
 	//底盘当前角度
 	float angle;
+	float angleBias; //角度偏置
 	
 	//底盘上一次的角度，只能在USART2_IRQHandler()函数里使用，在其他地方无意义
 	float lastAngle;
