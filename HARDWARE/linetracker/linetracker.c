@@ -1,5 +1,7 @@
 #include "linetracker.h"
 
+float angle_match[21];
+
 float linetracker(void)
 {
 	u16 res = grayScaleSensor2_Read();
@@ -21,7 +23,6 @@ float linetracker(void)
 void correspond(float speed)
 {
 	chassisSetState(speed * sin(chassis.angle), speed * cos(chassis.angle), chassis.angle + linetracker());
-
 }
 
 void angle_match_init(void)
@@ -47,17 +48,4 @@ void angle_match_init(void)
 	angle_match[18] = -8;
 	angle_match[19] = -9;
 	angle_match[20] = -10;
-	
-	
 }
-
-
-
-
-
-
-
-
-
-
-

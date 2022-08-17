@@ -10,7 +10,6 @@ float linetracker(void);
 void correspond(float speed);
 void angle_match_init(void);
 
-float angle_match[21];
-
+extern float angle_match[21];
 
 #endif

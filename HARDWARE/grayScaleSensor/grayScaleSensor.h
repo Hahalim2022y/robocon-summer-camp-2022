@@ -21,13 +21,8 @@
 
 void grayScaleSensor_Init(void);
 u8 grayScaleSensor_Read(void);
-void grayScaleSensor_Send(void);
 
 void grayScaleSensor2_Init(void);
 u16 grayScaleSensor2_Read(void);
-u8 grayScaleSensor2_Read_down(void);
-void grayScaleSensor2_Send(void);
-
 
 #endif
-
