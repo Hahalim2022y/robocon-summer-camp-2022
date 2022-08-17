@@ -11,6 +11,7 @@
 #include "key.h"
 #include "chassis.h"
 #include "cycleArray.h"
+#include "linetracker.h"
 
 int main(void)
 {
@@ -27,7 +28,9 @@ int main(void)
 	motorInit();
 	//LEDInit();
 	chassisInit();
-	//grayScaleSensor2_Init();
+	grayScaleSensor2_Init();
+	angle_match_init();
+	
 	
 	usart1Init(115200);
 	uart4Init(115200);
@@ -35,10 +38,10 @@ int main(void)
 	LED0(0);
 	LED1(0);
 	
-	int speed = 0;
+	float speed = 0;
 	float angle = 0;
 	
-	
+	u8 linetracker_switch=0;
 	
 	u16 i;
 	
@@ -94,6 +97,10 @@ int main(void)
 			{
 				chassisSetState(speed, 0, angle);
 			}
+			else if(strcmp(command, "Q") == 0)
+			{
+				linetracker_switch = !linetracker_switch;
+			}
 			else if(strcmp(command, "reset") == 0)
 			{
 				chassis.angleBias = attitude.yaw;
@@ -106,7 +113,7 @@ int main(void)
 			}
 			else if(strstr(command, "speed") != NULL)
 			{
-				speed = atoi(command + 5);
+				speed = atof(command + 5);
 			}
 			else if(strcmp(command, "angle") == 0)
 			{
@@ -127,9 +134,15 @@ int main(void)
 			{
 				chassisSetState(0, 0, angle);
 			}
+			
 			uart4_send(command);
 			uart4_send("\n");
 			commandFinish = 0;
 		}
+		if(linetracker_switch == 1) 
+		{
+			correspond(speed);
+		}
+			
 	}
 }

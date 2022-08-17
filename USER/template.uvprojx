@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\FWLib\inc;..\HARDWARE\LED;..\HARDWARE\grayScaleSensor;..\HARDWARE\gyro;..\HARDWARE\uart;..\HARDWARE\can;..\HARDWARE\motor3508;..\HARDWARE\pid;..\HARDWARE\key;..\HARDWARE\chassis;..\HARDWARE\delay;..\HARDWARE\sys</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\FWLib\inc;..\HARDWARE\LED;..\HARDWARE\grayScaleSensor;..\HARDWARE\gyro;..\HARDWARE\uart;..\HARDWARE\can;..\HARDWARE\motor3508;..\HARDWARE\pid;..\HARDWARE\key;..\HARDWARE\chassis;..\HARDWARE\delay;..\HARDWARE\sys;..\HARDWARE\linetracker</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -594,6 +594,11 @@
               <FileName>sys.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\sys\sys.c</FilePath>
+            </File>
+            <File>
+              <FileName>linetracker.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\linetracker\linetracker.c</FilePath>
             </File>
           </Files>
         </Group>

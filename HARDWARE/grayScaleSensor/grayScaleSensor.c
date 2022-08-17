@@ -86,16 +86,27 @@ void grayScaleSensor2_Init(void)
 
 }
 
-u8 grayScaleSensor2_Read_up(void)
+u16 grayScaleSensor2_Read(void)
 {
-	u8 res = 0x00;
-	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_4) << 5);
-	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_2) << 4);
-	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_0) << 3);
-	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_6) << 2);
-	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) << 1);
-	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) << 0);
-//	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) << 0);
+	u16 res = 0x00;
+//	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_4) << 5);
+//	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_2) << 4);
+//	res += (GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_0) << 3);
+//	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_6) << 2);
+//	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4) << 1);
+//	res += (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2) << 0);
+	res += (L1 << 0);
+	res += (L2 << 1);
+	res += (L3 << 2);
+	res += (L4 << 3);
+	res += (L5 << 4);
+	res += (M << 5);
+	res += (R5 << 6);
+	res += (R4 << 7);
+	res += (R3 << 8);
+	res += (R2 << 9);
+	res += (R1 << 10);
+
 	
 	return res;
 }
@@ -123,6 +134,7 @@ void grayScaleSensor2_Send(void)
 				if(gray_up & (1 << (5-i)))
 				{
 					uart1_send("1 ");
+					
 				}
 				else
 				{
@@ -146,3 +158,4 @@ void grayScaleSensor2_Send(void)
 			uart1_send("\r\n");
 
 }
+
