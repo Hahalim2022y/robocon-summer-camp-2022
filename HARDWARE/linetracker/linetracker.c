@@ -8,21 +8,26 @@ float linetracker(void)
 	u8 i;
 	int sum = 0;
 	int lightNum = 0;
+	static int id = 11;
 	for(i = 0; i < 11; i++)
 	{
-		if(res & (1 << i) != 0)
+		if((res & (1 << i)) != 0)
 		{
 			sum += i * 2;
 			lightNum ++;
 		}
 	}
-	return angle_match[sum / lightNum];
+	if(lightNum != 0)
+	{
+		id = sum / lightNum;
+	}
+	return angle_match[id];
 	
 }
 
 void correspond(float speed)
 {
-	chassisSetState(speed * sin(chassis.angle), speed * cos(chassis.angle), chassis.angle + linetracker());
+	chassisSetState(-speed * sin(chassis.angle/360*2*3.14159), speed * cos(chassis.angle/360*2*3.14159), chassis.angle + linetracker());
 }
 
 void angle_match_init(void)

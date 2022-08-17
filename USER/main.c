@@ -21,6 +21,7 @@ int main(void)
 	char buff[100];
 	u8 commandCnt = 0;
 	u8 commandFinish = 0;
+	u16 grayScaleSensor_res = grayScaleSensor2_Read();
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
 	//KEY_Init();
 	usart2Init(115200);
@@ -101,6 +102,22 @@ int main(void)
 			{
 				linetracker_switch = !linetracker_switch;
 			}
+			else if(strcmp(command, "gray") == 0)
+			{
+				grayScaleSensor_res = grayScaleSensor2_Read();
+				for(i = 0; i < 11; i++)
+				{
+					if((grayScaleSensor_res & (1 << i)) != 0)
+					{
+						uart4_send("1");
+					}
+					else
+					{
+						uart4_send("0");
+					}
+				}	
+				uart4_send("\n");
+			}
 			else if(strcmp(command, "reset") == 0)
 			{
 				chassis.angleBias = attitude.yaw;
@@ -132,7 +149,8 @@ int main(void)
 			}
 			else
 			{
-				chassisSetState(0, 0, angle);
+				chassisSetState(0, 0, chassis.angle);
+				linetracker_switch = 0;
 			}
 			
 			uart4_send(command);
@@ -143,6 +161,7 @@ int main(void)
 		{
 			correspond(speed);
 		}
+		
 			
 	}
 }

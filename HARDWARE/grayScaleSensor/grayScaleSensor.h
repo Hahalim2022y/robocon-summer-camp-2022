@@ -4,19 +4,18 @@
 #include <stm32f10x.h>
 #include "uart.h"
 
+#define L1 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2)
+#define L2 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3)
+#define L3 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4)
+#define L4 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5)
+#define L5 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_6)
+#define M GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13)
 
-#define L1 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_4)
-#define L2 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_5)
-#define L3 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_2)
-#define L4 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_3)
-#define L5 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_0)
-#define M GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_1)
-
-#define R5 GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_13)
-#define R4 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_4)
-#define R3 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_5)
-#define R2 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_2)
-#define R1 GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_3)
+#define R5 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_1)
+#define R4 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_2)
+#define R3 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_3)
+#define R2 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_4)
+#define R1 GPIO_ReadInputDataBit(GPIOF, GPIO_Pin_5)
 
 
 void grayScaleSensor_Init(void);
