@@ -22,7 +22,6 @@ float linetracker(void)
 		id = sum / lightNum;
 	}
 	return angle_match[id];
-	
 }
 
 void correspond(float speed)

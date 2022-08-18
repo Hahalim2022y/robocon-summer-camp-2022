@@ -41,8 +41,11 @@ int main(void)
 	
 	float speed = 0;
 	float angle = 0;
+	float angularVelocity = 0, angularVelocity_increase = 0;
+	float speed_x = 0, speed_y = 0;
 	
 	u8 linetracker_switch=0;
+	u8 control_mode = 0; //0 : 世界坐标  1 : 机器人坐标
 	
 	u16 i;
 	
@@ -82,21 +85,93 @@ int main(void)
 		}
 		if(commandFinish == 1)
 		{
-			if(strcmp(command, "W") == 0)
+			if(strcmp(command, "world") == 0)
 			{
-				chassisSetState(0, speed, angle);
+				control_mode = 0;
 			}
-			else if(strcmp(command, "S") == 0)
+			else if(strcmp(command, "body") == 0)
 			{
-				chassisSetState(0, -speed, angle);
+				control_mode = 1;
 			}
-			else if(strcmp(command, "A") == 0)
+			if(strcmp(command, "UP") == 0)
 			{
-				chassisSetState(-speed, 0, angle);
+				if(control_mode == 1)
+				{
+					speed_y += speed;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, speed, angle);
+				}
 			}
-			else if(strcmp(command, "D") == 0)
+			else if(strcmp(command, "up") == 0)
 			{
-				chassisSetState(speed, 0, angle);
+				if(control_mode == 1)
+				{
+					speed_y -= speed;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+			}
+			if(strcmp(command, "DOWN") == 0)
+			{
+				if(control_mode == 1)
+				{
+					speed_y -= speed;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, -speed, angle);
+				}
+			}
+			else if(strcmp(command, "down") == 0)
+			{
+				if(control_mode == 1)
+				{
+					speed_y += speed;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+			}
+			if(strcmp(command, "LEFT") == 0)
+			{
+				if(control_mode == 1)
+				{
+					angularVelocity += angularVelocity_increase;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+				else
+				{
+					chassisSetState(-speed, 0, angle);
+				}
+			}
+			else if(strcmp(command, "left") == 0)
+			{
+				if(control_mode == 1)
+				{
+					angularVelocity -= angularVelocity_increase;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+			}
+			if(strcmp(command, "RIGHT") == 0)
+			{
+				if(control_mode == 1)
+				{
+					angularVelocity -= angularVelocity_increase;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
+				else
+				{
+					chassisSetState(speed, 0, angle);
+				}
+			}
+			else if(strcmp(command, "right") == 0)
+			{
+				if(control_mode == 1)
+				{
+					angularVelocity += angularVelocity_increase;
+					chassisSetSpeed(speed_x, speed_y, angularVelocity);
+				}
 			}
 			else if(strcmp(command, "Q") == 0)
 			{
@@ -132,6 +207,15 @@ int main(void)
 			{
 				speed = atof(command + 5);
 			}
+			else if(strcmp(command, "angularVelocity") == 0)
+			{
+				sprintf(buff, "%f\n", angularVelocity_increase);
+				uart4_send(buff);
+			}
+			else if(strstr(command, "angularVelocity") != NULL)
+			{
+				angularVelocity_increase = atof(command + 15);
+			}
 			else if(strcmp(command, "angle") == 0)
 			{
 				sprintf(buff, "%f\n", chassis.angle + chassis.numOfTurns * 360);
@@ -161,7 +245,5 @@ int main(void)
 		{
 			correspond(speed);
 		}
-		
-			
 	}
 }
