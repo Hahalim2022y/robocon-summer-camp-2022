@@ -15,5 +15,6 @@ extern float xSum, ySum, xySum, xSquareSum;
 
 void lineTracker_linearRegression_init(void);
 void recordLightPos(float x, float y);
+void lineTracker_linearRegression(float speed);
 
 #endif

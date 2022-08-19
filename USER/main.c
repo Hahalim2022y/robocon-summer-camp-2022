@@ -12,6 +12,7 @@
 #include "chassis.h"
 #include "cycleArray.h"
 #include "linetracker.h"
+#include "lineTracker_linearRegression.h"
 
 int main(void)
 {
@@ -31,6 +32,7 @@ int main(void)
 	chassisInit();
 	grayScaleSensor2_Init();
 	angle_match_init();
+	lineTracker_linearRegression_init();
 	
 	
 	usart1Init(115200);
@@ -44,7 +46,7 @@ int main(void)
 	float angularVelocity = 0, angularVelocity_increase = 0;
 	float speed_x = 0, speed_y = 0;
 	
-	u8 linetracker_switch=0;
+	u8 linetracker_switch = 0;
 	u8 control_mode = 0; //0 : 世界坐标  1 : 机器人坐标
 	
 	u16 i;
@@ -92,8 +94,10 @@ int main(void)
 			else if(strcmp(command, "body") == 0)
 			{
 				control_mode = 1;
+				chassisSetSpeed(0, 0 ,0);
+				uart4_send("lalala\n");
 			}
-			if(strcmp(command, "UP") == 0)
+			else if(strcmp(command, "UP") == 0)
 			{
 				if(control_mode == 1)
 				{
@@ -109,11 +113,11 @@ int main(void)
 			{
 				if(control_mode == 1)
 				{
-					speed_y -= speed;
+					speed_y = 0;
 					chassisSetSpeed(speed_x, speed_y, angularVelocity);
 				}
 			}
-			if(strcmp(command, "DOWN") == 0)
+			else if(strcmp(command, "DOWN") == 0)
 			{
 				if(control_mode == 1)
 				{
@@ -129,11 +133,11 @@ int main(void)
 			{
 				if(control_mode == 1)
 				{
-					speed_y += speed;
+					speed_y = 0;
 					chassisSetSpeed(speed_x, speed_y, angularVelocity);
 				}
 			}
-			if(strcmp(command, "LEFT") == 0)
+			else if(strcmp(command, "LEFT") == 0)
 			{
 				if(control_mode == 1)
 				{
@@ -149,11 +153,11 @@ int main(void)
 			{
 				if(control_mode == 1)
 				{
-					angularVelocity -= angularVelocity_increase;
+					angularVelocity = 0;
 					chassisSetSpeed(speed_x, speed_y, angularVelocity);
 				}
 			}
-			if(strcmp(command, "RIGHT") == 0)
+			else if(strcmp(command, "RIGHT") == 0)
 			{
 				if(control_mode == 1)
 				{
@@ -169,7 +173,7 @@ int main(void)
 			{
 				if(control_mode == 1)
 				{
-					angularVelocity += angularVelocity_increase;
+					angularVelocity = 0;
 					chassisSetSpeed(speed_x, speed_y, angularVelocity);
 				}
 			}
@@ -233,7 +237,14 @@ int main(void)
 			}
 			else
 			{
-				chassisSetState(0, 0, chassis.angle);
+				if(control_mode == 0)
+				{
+					chassisSetState(0, 0, chassis.angle);
+				}
+				else
+				{
+					chassisSetSpeed(0, 0, 0);
+				}
 				linetracker_switch = 0;
 			}
 			
@@ -243,7 +254,8 @@ int main(void)
 		}
 		if(linetracker_switch == 1) 
 		{
-			correspond(speed);
+			//correspond(speed);
+			lineTracker_linearRegression(speed);
 		}
 	}
 }

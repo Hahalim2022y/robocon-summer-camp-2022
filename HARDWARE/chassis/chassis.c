@@ -53,7 +53,7 @@ void chassisSetSpeed(float vx, float vy, float angularVelocity)
 	// = 一秒轮子滚多远 * 60 / 轮子周长
 	// = 一分钟转几圈(rpm)
 	//chassis->rotatingSpeed = rotatingSpeed / 360 * (CHASSIS_RADIUS * 2 * 3.1415) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.rotatingSpeed = angularVelocity / 6;
+	chassis.rotatingSpeed = -angularVelocity / 6;
 	
 	chassis.enableAngleRing = 0;
 	

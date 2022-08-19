@@ -45,7 +45,8 @@ void motorSendCurrent(void)
 	TxMessage.DLC = 8; // 要发送的数据长度
 	for(i = 0; i < 8; i++)
 	{
-		TxMessage.Data[i] = can_motor_send_databuff[i];
+		//TxMessage.Data[i] = can_motor_send_databuff[i];
+		TxMessage.Data[i] = 0;
 	}
 	
 	mbox = CAN_Transmit(CAN1, &TxMessage);   
@@ -73,7 +74,7 @@ void motorInit(void)
 		motor[i].angle = 0;
 		motor[i].rpm = 0;
 		motor[i].dataReceived = 0;
-		pidInit(&motor[i].pid, 20, 0.2, 400);
+		pidInit(&motor[i].pid, 50, 0.2, 400);
 		motor[i].smoothTargetRpm = 0;
 	}
 }
