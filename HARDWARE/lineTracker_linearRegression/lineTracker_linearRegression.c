@@ -62,7 +62,7 @@ void lineTracker_linearRegression(float speed)
 {
 	static float lastChassis_x = 0, lastChassis_y = 0;
 	static int last_lightNum = 0;
-	static float angle = 0, k;
+	static float targetAngle = 0, k = 0;
 	
 	
 	u16 res = grayScaleSensor2_Read();
@@ -115,17 +115,22 @@ void lineTracker_linearRegression(float speed)
 	{
 		float len = fCycleArray_len(&pointsInLine_x);
 		k = ( xySum - xSum * ySum / len ) / ( xSquareSum - xSum * xSum / len );
-		angle = 90 - atanf(k) * 180 / 3.14159;
-		if(angle - chassis.angle > 100 || angle - chassis.angle < -100) angle = -angle;
-		chassisSetState(-speed * sinf(angle * 3.14159 / 180), speed * cosf(angle * 3.14159 / 180), angle);
+		targetAngle = atanf(k) * 180 / 3.14159 - 90;
+		if(targetAngle - chassis.angle > 100 || targetAngle - chassis.angle < -100)
+		{
+			targetAngle = targetAngle + 180;
+		}
+		chassisSetState(-speed * sinf(targetAngle * 3.14159 / 180), speed * cosf(targetAngle * 3.14159 / 180)
+			, targetAngle);
 		
 		char b[30];
-		sprintf(b, "%f\n", angle);
+		sprintf(b, "%f\n", targetAngle);
 		uart4_send(b);
 	}
 	else
 	{
-		chassisSetState(-speed * sinf(angle * 3.14159 / 180), speed * cosf(angle * 3.14159 / 180), angle);
+		chassisSetState(-speed * sinf(targetAngle * 3.14159 / 180), speed * cosf(targetAngle * 3.14159 / 180)
+			, targetAngle);
 	}
 	
 	return;
