@@ -25,11 +25,25 @@ void chassisSetState(float vx, float vy, float targetAngle)
 	chassis.targetAngle = targetAngle;
 	
 	chassis.enableAngleRing = 1;
+	
+//	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
+//	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
+//	chassis.v3 = chassis.translationSpeed_3 + chassis.rotatingSpeed;
+//	
+//	motorSetTargetRpm(&motor[0], chassis.v1);
+//	motorSetTargetRpm(&motor[1], chassis.v2);
+//	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
 // 角速度单位：度每秒
 void chassisSetSpeed(float vx, float vy, float angularVelocity)
-{	
+{
+//	float body_vx, body_vy;
+//	body_vx = vx * cos(-chassis.angle / 360 * (2 * 3.14159)) 
+//						- vy * sin(-chassis.angle / 360 * (2 * 3.14159));
+//	body_vy = vx * sin(-chassis.angle / 360 * (2 * 3.14159)) 
+//						+ vy * cos(-chassis.angle / 360 * (2 * 3.14159));
+	
 	//把mm/s转换成rpm	
 	chassis.translationSpeed_1 = (vx / 2 - vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
 	chassis.translationSpeed_2 = (vx / 2 + vy * (1.732 / 2)) * 60 / (WHEEL_DIAMETER * 3.1415);
@@ -39,17 +53,9 @@ void chassisSetSpeed(float vx, float vy, float angularVelocity)
 	// = 一秒轮子滚多远 * 60 / 轮子周长
 	// = 一分钟转几圈(rpm)
 	//chassis->rotatingSpeed = rotatingSpeed / 360 * (CHASSIS_RADIUS * 2 * 3.1415) * 60 / (WHEEL_DIAMETER * 3.1415);
-	chassis.rotatingSpeed = -angularVelocity * CHASSIS_RADIUS / 3 / WHEEL_RADIUS;
+	chassis.rotatingSpeed = -angularVelocity * CHASSIS_RADIUS / 3 / WHEEL_DIAMETER;
 	
 	chassis.enableAngleRing = 0;
-	
-	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
-	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
-	chassis.v3 = chassis.translationSpeed_3 + chassis.rotatingSpeed;
-	
-	motorSetTargetRpm(&motor[0], chassis.v1);
-	motorSetTargetRpm(&motor[1], chassis.v2);
-	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
 void chassisAngleRing(void)
