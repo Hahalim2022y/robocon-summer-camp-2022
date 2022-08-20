@@ -6,10 +6,12 @@
 #include "grayScaleSensor.h"
 #include "chassis.h"
 
-float linetracker(void);
-void correspond(float speed);
+void linetracker(void);
+void linetracker_translation(void);
 void angle_match_init(void);
+void linetracker_translation(void);
 
-extern float angle_match[21];
+extern float lineTrackerSpeed;
+extern float lineTrackerAngle;
 
 #endif

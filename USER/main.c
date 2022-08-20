@@ -12,7 +12,6 @@
 #include "chassis.h"
 #include "cycleArray.h"
 #include "linetracker.h"
-#include "lineTracker_linearRegression.h"
 
 int main(void)
 {
@@ -24,21 +23,17 @@ int main(void)
 	u8 commandFinish = 0;
 	u16 grayScaleSensor_res = grayScaleSensor2_Read();
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
-	//KEY_Init();
 	usart2Init(115200);
-	//u32 time = 0;
 	motorInit();
-	//LEDInit();
 	chassisInit();
 	grayScaleSensor2_Init();
 	angle_match_init();
-	lineTracker_linearRegression_init();
 	
 	
 	usart1Init(115200);
 	uart4Init(115200);
 	
-	LED0(0);
+	LED0(1);
 	LED1(0);
 	
 	float speed = 0;
@@ -47,11 +42,12 @@ int main(void)
 	float speed_x = 0, speed_y = 0;
 	
 	u8 linetracker_switch = 0;
+	u8 translation_linetracker_switch = 0;
 	u8 control_mode = 0; //0 : 世界坐标  1 : 机器人坐标
 	
-	u16 i;
+	int i;
 	
-	for(i = 0; i < 10000; i++)
+	for(i = 0; i < 1000; i++)
 	{
 		chassis.angleBias = attitude.yaw;
 		chassis.angle = 0;
@@ -61,8 +57,6 @@ int main(void)
 	
 	while(1)
 	{
-		//uart1_send("123");
-		//uart4_send("123");
 		while(1)
 		{
 			if(uart4_read(&res) == 1)
@@ -95,7 +89,6 @@ int main(void)
 			{
 				control_mode = 1;
 				chassisSetSpeed(0, 0 ,0);
-				uart4_send("lalala\n");
 			}
 			else if(strcmp(command, "UP") == 0)
 			{
@@ -177,9 +170,17 @@ int main(void)
 					chassisSetSpeed(speed_x, speed_y, angularVelocity);
 				}
 			}
-			else if(strcmp(command, "Q") == 0)
+			else if(strcmp(command, "linetracker") == 0)
 			{
 				linetracker_switch = !linetracker_switch;
+				translation_linetracker_switch = 0;
+				control_mode = 0;
+			}
+			else if(strcmp(command, "translation linetracker") == 0)
+			{
+				translation_linetracker_switch = !translation_linetracker_switch ;
+				linetracker_switch = 0;
+				control_mode = 0;
 			}
 			else if(strcmp(command, "gray") == 0)
 			{
@@ -210,6 +211,7 @@ int main(void)
 			else if(strstr(command, "speed") != NULL)
 			{
 				speed = atof(command + 5);
+				lineTrackerSpeed = speed;
 			}
 			else if(strcmp(command, "angularVelocity") == 0)
 			{
@@ -229,11 +231,7 @@ int main(void)
 			{
 				angle = atof(command + 5);
 				chassisSetState(0, 0, angle);
-			}
-			else if(strcmp(command, "xy") == 0)
-			{
-				sprintf(buff, "%f , %f\n", chassis.world_x * 1.0175 + 114.55, chassis.world_y * 1.0175 + 114.55);
-				uart4_send(buff);
+				lineTrackerAngle = angle;
 			}
 			else
 			{
@@ -246,6 +244,7 @@ int main(void)
 					chassisSetSpeed(0, 0, 0);
 				}
 				linetracker_switch = 0;
+				translation_linetracker_switch = 0;
 			}
 			
 			uart4_send(command);
@@ -254,8 +253,11 @@ int main(void)
 		}
 		if(linetracker_switch == 1) 
 		{
-			//correspond(speed);
-			lineTracker_linearRegression(speed);
+			linetracker();
+		}
+		if(translation_linetracker_switch == 1)
+		{
+			linetracker_translation();
 		}
 	}
 }
