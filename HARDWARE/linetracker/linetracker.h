@@ -12,6 +12,7 @@ void linetracker(void);
 void linetracker_translation(void);
 void angle_match_init(void);
 void linetracker_translation(void);
+void translationSpeed_match_init(void);
 
 extern float lineTrackerSpeed;
 extern float lineTrackerAngle;

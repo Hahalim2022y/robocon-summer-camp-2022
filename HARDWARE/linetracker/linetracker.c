@@ -1,7 +1,7 @@
 #include "linetracker.h"
 #include "uart.h"
 
-float angularVelocity_match[21];
+//float angularVelocity_match[21];
 float angle_match[21];
 float translationSpeed_match[21];
 float lineTrackerSpeed;
@@ -70,10 +70,12 @@ void linetracker(void)
 		, lineTrackerSpeed * cosf(angle / 180 * 3.14159), angle + angle_match[id]);
 }
 
+float fxxk;
+
 void linetracker_translation(void)
 {
 	u16 res = grayScaleSensor2_Read();
-	u8 i;
+	int i;
 	int sum = 0;
 	int lightNum = 0;
 	static int id = 10;
@@ -124,6 +126,9 @@ void linetracker_translation(void)
 	float angle = chassis.angle;
 	if(angle > 360 || angle < -360) return;
 	
+	fxxk = -lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
+		+ translationSpeed_match[id] * cosf(angle / 180 * 3.14159);
+	
 	chassisSetState(-lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
 		+ translationSpeed_match[id] * cosf(angle / 180 * 3.14159)
 	
@@ -160,52 +165,52 @@ void linetracker_translation(void)
 
 void angle_match_init(void)
 {
-	angle_match[0] = 20;
-	angle_match[1] = 18;
-	angle_match[2] = 16;
-	angle_match[3] = 14;
-	angle_match[4] = 12;
-	angle_match[5] = 10;
-	angle_match[6] = 8;
-	angle_match[7] = 6;
-	angle_match[8] = 4;
-	angle_match[9] = 2;
+	angle_match[0] = 19;
+	angle_match[1] = 17;
+	angle_match[2] = 15;
+	angle_match[3] = 13;
+	angle_match[4] = 11;
+	angle_match[5] = 9;
+	angle_match[6] = 7;
+	angle_match[7] = 5;
+	angle_match[8] = 3;
+	angle_match[9] = 1;
 	angle_match[10] = 0;
-	angle_match[11] = -2;
-	angle_match[12] = -4;
-	angle_match[13] = -6;
-	angle_match[14] = -8;
-	angle_match[15] = -10;
-	angle_match[16] = -12;
-	angle_match[17] = -14;
-	angle_match[18] = -16;
-	angle_match[19] = -18;
-	angle_match[20] = -20;
+	angle_match[11] = -1;
+	angle_match[12] = -3;
+	angle_match[13] = -5;
+	angle_match[14] = -7;
+	angle_match[15] = -9;
+	angle_match[16] = -11;
+	angle_match[17] = -13;
+	angle_match[18] = -15;
+	angle_match[19] = -17;
+	angle_match[20] = -19;
 }
 
 void translationSpeed_match_init(void)
 {
-	translationSpeed_match[0] = -200;
-	translationSpeed_match[1] = -180;
-	translationSpeed_match[2] = -160;
-	translationSpeed_match[3] = -140;
-	translationSpeed_match[4] = -120;
-	translationSpeed_match[5] = -100;
-	translationSpeed_match[6] = -80;
-	translationSpeed_match[7] = -60;
-	translationSpeed_match[8] = -40;
-	translationSpeed_match[9] = -20;
+	translationSpeed_match[0] = -350;
+	translationSpeed_match[1] = -315;
+	translationSpeed_match[2] = -280;
+	translationSpeed_match[3] = -245;
+	translationSpeed_match[4] = -210;
+	translationSpeed_match[5] = -175;
+	translationSpeed_match[6] = -140;
+	translationSpeed_match[7] = -105;
+	translationSpeed_match[8] = -70;
+	translationSpeed_match[9] = -35;
 	translationSpeed_match[10] = 0;
-	translationSpeed_match[11] = 20;
-	translationSpeed_match[12] = 40;
-	translationSpeed_match[13] = 60;
-	translationSpeed_match[14] = 80;
-	translationSpeed_match[15] = 100;
-	translationSpeed_match[16] = 120;
-	translationSpeed_match[17] = 140;
-	translationSpeed_match[18] = 160;
-	translationSpeed_match[19] = 180;
-	translationSpeed_match[20] = 200;
+	translationSpeed_match[11] = 35;
+	translationSpeed_match[12] = 70;
+	translationSpeed_match[13] = 105;
+	translationSpeed_match[14] = 140;
+	translationSpeed_match[15] = 175;
+	translationSpeed_match[16] = 210;
+	translationSpeed_match[17] = 245;
+	translationSpeed_match[18] = 280;
+	translationSpeed_match[19] = 315;
+	translationSpeed_match[20] = 350;
 }
 
 // void TIM3_Init(u16 arr,u16 psc)

@@ -56,6 +56,14 @@ void chassisSetSpeed(float vx, float vy, float angularVelocity)
 	chassis.rotatingSpeed = -angularVelocity * CHASSIS_RADIUS / 3 / WHEEL_DIAMETER;
 	
 	chassis.enableAngleRing = 0;
+	
+	chassis.v1 = chassis.translationSpeed_1 + chassis.rotatingSpeed;
+	chassis.v2 = chassis.translationSpeed_2 + chassis.rotatingSpeed;
+	chassis.v3 = chassis.translationSpeed_3 + chassis.rotatingSpeed;
+	
+	motorSetTargetRpm(&motor[0], chassis.v1);
+	motorSetTargetRpm(&motor[1], chassis.v2);
+	motorSetTargetRpm(&motor[2], chassis.v3);
 }
 
 void chassisAngleRing(void)

@@ -28,6 +28,7 @@ int main(void)
 	chassisInit();
 	grayScaleSensor2_Init();
 	angle_match_init();
+	translationSpeed_match_init();
 	
 	
 	usart1Init(115200);
@@ -47,7 +48,7 @@ int main(void)
 	
 	int i;
 	
-	for(i = 0; i < 1000; i++)
+	for(i = 0; i < 10000; i++)
 	{
 		chassis.angleBias = attitude.yaw;
 		chassis.angle = 0;
@@ -178,7 +179,7 @@ int main(void)
 			}
 			else if(strcmp(command, "translation linetracker") == 0)
 			{
-				translation_linetracker_switch = !translation_linetracker_switch ;
+				translation_linetracker_switch = !translation_linetracker_switch;
 				linetracker_switch = 0;
 				control_mode = 0;
 			}
