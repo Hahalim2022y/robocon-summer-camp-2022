@@ -1,16 +1,11 @@
 #include "linetracker.h"
-#include "uart.h"
 
 //float angularVelocity_match[21];
 float angle_match[21];
 float translationSpeed_match[21];
-float lineTrackerSpeed;
-float lineTrackerAngle;
-// float linetrackerSpeed = 0;
-
-// FCycleArray errorTester;
-
-// char error_id[200];
+float lineTrackerSpeed = 0;
+float lineTrackerAngle = 0;
+int grayScaleSensor_id = 10;
 
 void linetracker(void)
 {
@@ -18,7 +13,6 @@ void linetracker(void)
 	int i;
 	int sum = 0;
 	int lightNum = 0;
-	static int id = 11;
 	
 	for(i = 0; i < 11; i++)
 	{
@@ -28,16 +22,18 @@ void linetracker(void)
 			lightNum ++;
 		}
 	}
+	
 	if(lightNum != 0)
 	{
-		id = sum / lightNum;
+		grayScaleSensor_id = sum / lightNum;
 		sum = 0;
 		lightNum = 0;
 	}
 	
-	if(id % 2 == 0)
+	if(grayScaleSensor_id % 2 == 0)
 	{
-		for(i = ( (id / 2 - 1) > 0 ? (id / 2 - 1) : 0 ); i <= ( (id / 2 + 1) < 10 ? (id / 2 + 1) : 10 ); i++)
+		for(i = ( (grayScaleSensor_id / 2 - 1) > 0 ? (grayScaleSensor_id / 2 - 1) : 0 );
+			i <= ( (grayScaleSensor_id / 2 + 1) < 10 ? (grayScaleSensor_id / 2 + 1) : 10 ); i++)
 		{
 			if((res & (1 << i)) != 0)
 			{
@@ -48,7 +44,8 @@ void linetracker(void)
 	}
 	else
 	{
-		for(i = ( (id / 2 - 1) > 0 ? (id / 2 - 1) : 0 ); i <= ( (id / 2 + 2) < 10 ? (id / 2 + 2) : 10 ); i++)
+		for(i = ( (grayScaleSensor_id / 2 - 1) > 0 ? (grayScaleSensor_id / 2 - 1) : 0 );
+			i <= ( (grayScaleSensor_id / 2 + 2) < 10 ? (grayScaleSensor_id / 2 + 2) : 10 ); i++)
 		{
 			if((res & (1 << i)) != 0)
 			{
@@ -60,17 +57,17 @@ void linetracker(void)
 	
 	if(lightNum != 0)
 	{
-		id = sum / lightNum;
+		grayScaleSensor_id = sum / lightNum;
 	}
 	
 	float angle = chassis.angle;
-	if(angle > 360 || angle < -360) return;
+	float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
+	float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
+	if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
+		|| (vx == 0 && vy == 0)) return;
 	
-	chassisSetState(-lineTrackerSpeed * sinf(angle / 180 * 3.14159)
-		, lineTrackerSpeed * cosf(angle / 180 * 3.14159), angle + angle_match[id]);
+	chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
 }
-
-float fxxk;
 
 void linetracker_translation(void)
 {
@@ -78,7 +75,6 @@ void linetracker_translation(void)
 	int i;
 	int sum = 0;
 	int lightNum = 0;
-	static int id = 10;
 	
 	for(i = 0; i < 11; i++)
 	{
@@ -88,16 +84,18 @@ void linetracker_translation(void)
 			lightNum ++;
 		}
 	}
+	
 	if(lightNum != 0)
 	{
-		id = sum / lightNum;
+		grayScaleSensor_id = sum / lightNum;
 		sum = 0;
 		lightNum = 0;
 	}
 	
-	if(id % 2 == 0)
+	if(grayScaleSensor_id % 2 == 0)
 	{
-		for(i = ( (id / 2 - 1) > 0 ? (id / 2 - 1) : 0 ); i <= ( (id / 2 + 1) < 10 ? (id / 2 + 1) : 10 ); i++)
+		for(i = ( (grayScaleSensor_id / 2 - 1) > 0 ? (grayScaleSensor_id / 2 - 1) : 0 ); 
+			i <= ( (grayScaleSensor_id / 2 + 1) < 10 ? (grayScaleSensor_id / 2 + 1) : 10 ); i++)
 		{
 			if((res & (1 << i)) != 0)
 			{
@@ -108,7 +106,8 @@ void linetracker_translation(void)
 	}
 	else
 	{
-		for(i = ( (id / 2 - 1) > 0 ? (id / 2 - 1) : 0 ); i <= ( (id / 2 + 2) < 10 ? (id / 2 + 2) : 10 ); i++)
+		for(i = ( (grayScaleSensor_id / 2 - 1) > 0 ? (grayScaleSensor_id / 2 - 1) : 0 );
+			i <= ( (grayScaleSensor_id / 2 + 2) < 10 ? (grayScaleSensor_id / 2 + 2) : 10 ); i++)
 		{
 			if((res & (1 << i)) != 0)
 			{
@@ -120,48 +119,30 @@ void linetracker_translation(void)
 	
 	if(lightNum != 0)
 	{
-		id = sum / lightNum;
+		grayScaleSensor_id = sum / lightNum;
 	}
 	
 	float angle = chassis.angle;
-	if(angle > 360 || angle < -360) return;
 	
-	fxxk = -lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
-		+ translationSpeed_match[id] * cosf(angle / 180 * 3.14159);
+	float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
+				+ translationSpeed_match[grayScaleSensor_id] * cosf(angle / 180 * 3.14159);
 	
-	chassisSetState(-lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
-		+ translationSpeed_match[id] * cosf(angle / 180 * 3.14159)
+	float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159)
+				+ translationSpeed_match[grayScaleSensor_id] * sinf(angle / 180 * 3.14159);
 	
-		, lineTrackerSpeed * cosf(angle / 180 * 3.14159)
-		+ translationSpeed_match[id] * sinf(angle / 180 * 3.14159)
+	if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
+		|| (vx == 0 && vy == 0)) return;
+	
+	chassisSetState(vx, vy, lineTrackerAngle);
 		
-		, lineTrackerAngle);
+//	chassisSetState(-lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
+//		+ translationSpeed_match[grayScaleSensor_id] * cosf(angle / 180 * 3.14159)
+//	
+//		, lineTrackerSpeed * cosf(angle / 180 * 3.14159)
+//		+ translationSpeed_match[grayScaleSensor_id] * sinf(angle / 180 * 3.14159)
+//		
+//		, lineTrackerAngle);
 }
-
-// void angularVelocity_match_init(void)
-// {
-// 	angularVelocity_match[0] = 300;
-// 	angularVelocity_match[1] = 260;
-// 	angularVelocity_match[2] = 230;
-// 	angularVelocity_match[3] = 200;
-// 	angularVelocity_match[4] = 170;
-// 	angularVelocity_match[5] = 140;
-// 	angularVelocity_match[6] = 110;
-// 	angularVelocity_match[7] = 80;
-// 	angularVelocity_match[8] = 40;
-// 	angularVelocity_match[9] = 20;
-// 	angularVelocity_match[10] = 0;
-// 	angularVelocity_match[11] = -20;
-// 	angularVelocity_match[12] = -40;
-// 	angularVelocity_match[13] = -80;
-// 	angularVelocity_match[14] = -110;
-// 	angularVelocity_match[15] = -140;
-// 	angularVelocity_match[16] = -170;
-// 	angularVelocity_match[17] = -200;
-// 	angularVelocity_match[18] = -230;
-// 	angularVelocity_match[19] = -260;
-// 	angularVelocity_match[20] = -300;
-// }
 
 void angle_match_init(void)
 {
@@ -212,6 +193,31 @@ void translationSpeed_match_init(void)
 	translationSpeed_match[19] = 315;
 	translationSpeed_match[20] = 350;
 }
+
+// void angularVelocity_match_init(void)
+// {
+// 	angularVelocity_match[0] = 300;
+// 	angularVelocity_match[1] = 260;
+// 	angularVelocity_match[2] = 230;
+// 	angularVelocity_match[3] = 200;
+// 	angularVelocity_match[4] = 170;
+// 	angularVelocity_match[5] = 140;
+// 	angularVelocity_match[6] = 110;
+// 	angularVelocity_match[7] = 80;
+// 	angularVelocity_match[8] = 40;
+// 	angularVelocity_match[9] = 20;
+// 	angularVelocity_match[10] = 0;
+// 	angularVelocity_match[11] = -20;
+// 	angularVelocity_match[12] = -40;
+// 	angularVelocity_match[13] = -80;
+// 	angularVelocity_match[14] = -110;
+// 	angularVelocity_match[15] = -140;
+// 	angularVelocity_match[16] = -170;
+// 	angularVelocity_match[17] = -200;
+// 	angularVelocity_match[18] = -230;
+// 	angularVelocity_match[19] = -260;
+// 	angularVelocity_match[20] = -300;
+// }
 
 // void TIM3_Init(u16 arr,u16 psc)
 // {

@@ -18,7 +18,7 @@
 typedef struct _Chassis 
 {
 	//底盘的世界坐标系位置
-	float world_x, world_y;
+	//float world_x, world_y;
 	
 	//底盘当前角度
 	float angle;
@@ -27,7 +27,7 @@ typedef struct _Chassis
 	//底盘上一次的角度，只能在USART2_IRQHandler()函数里使用，在其他地方无意义
 	float lastAngle;
 	
-	short numOfTurns;
+	int numOfTurns;
 	
 	//设定的角度
 	float targetAngle;

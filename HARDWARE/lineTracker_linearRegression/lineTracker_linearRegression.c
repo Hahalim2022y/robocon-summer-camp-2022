@@ -1,5 +1,5 @@
 #include "lineTracker_linearRegression.h"
-
+/*
 FCycleArray pointsInLine_x;
 FCycleArray pointsInLine_y;
 
@@ -135,3 +135,4 @@ void lineTracker_linearRegression(float speed)
 	
 	return;
 }
+*/
