@@ -12,7 +12,6 @@
 #include "chassis.h"
 #include "cycleArray.h"
 #include "linetracker.h"
-#include "lineTracker_linearRegression.h"
 
 int main(void)
 {
@@ -26,17 +25,21 @@ int main(void)
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
 	//KEY_Init();
 	usart2Init(115200);
+	usart1Init(115200);
+	uart4Init(115200);
 	//u32 time = 0;
 	motorInit();
 	//LEDInit();
 	chassisInit();
 	grayScaleSensor2_Init();
+	//angularVelocity_match_init();
 	angle_match_init();
-	lineTracker_linearRegression_init();
+	//lineTracker_linearRegression_init();
+	TIM3_Init(40 - 1, 50000 - 1);
 	
 	
-	usart1Init(115200);
-	uart4Init(115200);
+	
+	//fCycleArray_init(&errorTester);
 	
 	LED0(0);
 	LED1(0);
@@ -49,7 +52,7 @@ int main(void)
 	u8 linetracker_switch = 0;
 	u8 control_mode = 0; //0 : 世界坐标  1 : 机器人坐标
 	
-	u16 i;
+	int i;
 	
 	for(i = 0; i < 10000; i++)
 	{
@@ -90,6 +93,7 @@ int main(void)
 			if(strcmp(command, "world") == 0)
 			{
 				control_mode = 0;
+				chassisSetState(0, 0, chassis.angle);
 			}
 			else if(strcmp(command, "body") == 0)
 			{
@@ -180,6 +184,25 @@ int main(void)
 			else if(strcmp(command, "Q") == 0)
 			{
 				linetracker_switch = !linetracker_switch;
+//				if(linetracker_switch)
+//				{
+//					TIM_Cmd(TIM3, ENABLE);
+//					TIM_ITConfig(TIM3,TIM_IT_Update, ENABLE);
+//				}
+//				else
+//				{
+//					TIM_Cmd(TIM3, DISABLE);
+//					TIM_ITConfig(TIM3,TIM_IT_Update, DISABLE);
+//					if(control_mode == 0)
+//					{
+//						chassisSetState(0, 0, chassis.angle);
+//					}
+//					else
+//					{
+//						chassisSetSpeed(0, 0, 0);
+//					}
+//					linetracker_switch = 0;
+//				}
 			}
 			else if(strcmp(command, "gray") == 0)
 			{
@@ -210,6 +233,7 @@ int main(void)
 			else if(strstr(command, "speed") != NULL)
 			{
 				speed = atof(command + 5);
+				linetrackerSpeed = speed;
 			}
 			else if(strcmp(command, "angularVelocity") == 0)
 			{
@@ -235,8 +259,24 @@ int main(void)
 				sprintf(buff, "%f , %f\n", chassis.world_x * 1.0175 + 114.55, chassis.world_y * 1.0175 + 114.55);
 				uart4_send(buff);
 			}
+			else if(strcmp(command, "out") == 0)
+			{
+				for(i = errorTester.head; i < errorTester.tail; i++)
+				{
+					i = i % FCYCLEARRAY_SIZE;
+					sprintf(buff, "%f\n", errorTester.data[i]);
+					uart4_send(buff);
+				}
+			}
+			else if(strcmp(command, "A") == 0)
+			{
+				sprintf(buff, "%f\n", linetracker());
+				uart4_send(buff);
+			}
 			else
 			{
+				TIM_Cmd(TIM3, DISABLE);
+				TIM_ITConfig(TIM3,TIM_IT_Update, DISABLE);
 				if(control_mode == 0)
 				{
 					chassisSetState(0, 0, chassis.angle);
@@ -246,6 +286,7 @@ int main(void)
 					chassisSetSpeed(0, 0, 0);
 				}
 				linetracker_switch = 0;
+				//TIM_Cmd(TIM3, DISABLE);
 			}
 			
 			uart4_send(command);
@@ -254,8 +295,8 @@ int main(void)
 		}
 		if(linetracker_switch == 1) 
 		{
-			//correspond(speed);
-			lineTracker_linearRegression(speed);
+			correspond(speed);
+			//lineTracker_linearRegression(speed);
 		}
 	}
 }

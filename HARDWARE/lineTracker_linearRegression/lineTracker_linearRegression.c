@@ -78,7 +78,7 @@ void lineTracker_linearRegression(float speed)
 	}
 	
 	if( (chassis.world_x - lastChassis_x) * (chassis.world_x - lastChassis_x) 
-		+ (chassis.world_y - lastChassis_y) * (chassis.world_y - lastChassis_y) < 81
+		+ (chassis.world_y - lastChassis_y) * (chassis.world_y - lastChassis_y) < 1600
 		&& (lightNum - last_lightNum < 2 && lightNum - last_lightNum > -2) )
 	{
 		//如果灯数量变化小，并且位移也小，就返回

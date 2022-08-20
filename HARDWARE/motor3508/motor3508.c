@@ -45,8 +45,8 @@ void motorSendCurrent(void)
 	TxMessage.DLC = 8; // 要发送的数据长度
 	for(i = 0; i < 8; i++)
 	{
-		//TxMessage.Data[i] = can_motor_send_databuff[i];
-		TxMessage.Data[i] = 0;
+		TxMessage.Data[i] = can_motor_send_databuff[i];
+		//TxMessage.Data[i] = 0;
 	}
 	
 	mbox = CAN_Transmit(CAN1, &TxMessage);   
