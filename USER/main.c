@@ -13,13 +13,14 @@ int main(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	
 	u8 res;
+	u16 gray_res;
 	char command[100];
 	char buff[100];
 	u8 commandCnt = 0;
 	u8 commandFinish = 0;
 	
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
-	usart1Init(115200);
+	//usart1Init(115200);
 	usart2Init(115200);
 	uart4Init(115200);
 	motorInit();
@@ -46,6 +47,8 @@ int main(void)
 		chassis.lastAngle = 361;
 		chassis.numOfTurns = 0;
 		grayScaleSensor_id = 10;
+		lineTrackerAngle = 0;
+		lineTrackerSpeed = 0;
 	}
 	
 	while(1)
@@ -74,6 +77,10 @@ int main(void)
 		}
 		if(commandFinish == 1)
 		{
+			uart4_send(command);
+			uart4_send("\n");
+			commandFinish = 0;
+			
 			if(strcmp(command, "world") == 0)
 			{
 				control_mode = 0;
@@ -169,6 +176,24 @@ int main(void)
 				linetracker_switch = !linetracker_switch;
 				translation_linetracker_switch = 0;
 				control_mode = 0;
+				if(linetracker_switch)
+				{
+					uart4_send("linetracker on\n");
+				}
+				else
+				{
+					uart4_send("line tracker off\n");
+					if(control_mode == 0)
+					{
+						chassisSetState(0, 0, chassis.angle);
+					}
+					else
+					{
+						chassisSetSpeed(0, 0, 0);
+					}
+					linetracker_switch = 0;
+					translation_linetracker_switch = 0;
+				}
 			}
 			else if(strcmp(command, "translation linetracker") == 0)
 			{
@@ -176,6 +201,24 @@ int main(void)
 				translation_linetracker_switch = !translation_linetracker_switch;
 				linetracker_switch = 0;
 				control_mode = 0;
+				if(translation_linetracker_switch)
+				{
+					uart4_send("translation tracker on\n");
+				}
+				else
+				{
+					uart4_send("translation tracker off\n");
+					if(control_mode == 0)
+					{
+						chassisSetState(0, 0, chassis.angle);
+					}
+					else
+					{
+						chassisSetSpeed(0, 0, 0);
+					}
+					linetracker_switch = 0;
+					translation_linetracker_switch = 0;
+				}
 			}
 			else if(strcmp(command, "reset") == 0)
 			{
@@ -184,6 +227,8 @@ int main(void)
 				chassis.lastAngle = 361;
 				chassis.numOfTurns = 0;
 				grayScaleSensor_id = 10;
+				lineTrackerAngle = 0;
+				lineTrackerSpeed = 0;
 			}
 			else if(strstr(command, "speed") != NULL)
 			{
@@ -206,6 +251,22 @@ int main(void)
 				chassisSetState(0, 0, world_angle);
 				lineTrackerAngle = world_angle;
 			}
+			else if(strstr(command, "gray") != NULL)
+			{
+				gray_res = grayScaleSensor2_Read();
+				for(i = 0; i < 11; i++)
+				{
+					if((gray_res & (1 << i)) != 0)
+					{
+						uart4_send("1");
+					}
+					else
+					{
+						uart4_send("0");
+					}
+				}
+				uart4_send("\n");
+			}
 			else
 			{
 				if(control_mode == 0)
@@ -219,10 +280,6 @@ int main(void)
 				linetracker_switch = 0;
 				translation_linetracker_switch = 0;
 			}
-			
-			uart4_send(command);
-			uart4_send("\n");
-			commandFinish = 0;
 		}
 		if(linetracker_switch == 1) 
 		{

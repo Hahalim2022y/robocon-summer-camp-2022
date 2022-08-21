@@ -29,6 +29,10 @@ void linetracker(void)
 		sum = 0;
 		lightNum = 0;
 	}
+	else
+	{
+		return;
+	}
 	
 	if(grayScaleSensor_id % 2 == 0)
 	{
@@ -58,6 +62,10 @@ void linetracker(void)
 	if(lightNum != 0)
 	{
 		grayScaleSensor_id = sum / lightNum;
+	}
+	else
+	{
+		return;
 	}
 	
 	float angle = chassis.angle;
@@ -91,6 +99,10 @@ void linetracker_translation(void)
 		sum = 0;
 		lightNum = 0;
 	}
+	else
+	{
+		return;
+	}
 	
 	if(grayScaleSensor_id % 2 == 0)
 	{
@@ -120,6 +132,10 @@ void linetracker_translation(void)
 	if(lightNum != 0)
 	{
 		grayScaleSensor_id = sum / lightNum;
+	}
+	else
+	{
+		return;
 	}
 	
 	float angle = chassis.angle;

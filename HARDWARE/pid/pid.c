@@ -14,7 +14,7 @@ float pidOutput(PidStruct *pid, float target, float current)
 {
 	float res = 0;
 	pid->error = target - current;
-	pid->error_sum += pid->error;
+	if(pid->error > 0.1 || pid->error < -0.1) pid->error_sum += pid->error;
 	res = pid->kp * pid->error + pid->ki * pid->error_sum + pid->kd * (pid->error - pid->last_error);
 	pid->last_error = pid->error;
 	return res;
