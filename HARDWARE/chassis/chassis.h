@@ -18,7 +18,7 @@
 typedef struct _Chassis 
 {
 	//底盘的世界坐标系位置
-	float world_x, world_y;
+	//float world_x, world_y;
 	
 	//底盘当前角度
 	float angle;
@@ -27,10 +27,11 @@ typedef struct _Chassis
 	//底盘上一次的角度，只能在USART2_IRQHandler()函数里使用，在其他地方无意义
 	float lastAngle;
 	
-	short numOfTurns;
+	int numOfTurns;
 	
 	//设定的角度
 	float targetAngle;
+	float smoothTargetAngle;
 	
 	//设定的平移速度
 	float vx, vy;
@@ -44,6 +45,9 @@ typedef struct _Chassis
 	//输出给速度环的速度
 	float v1, v2, v3;
 	
+	//使能角度环
+	u8 enableAngleRing;
+	
 	//角度环pid
 	PidStruct AngleRing_pid;	
 } Chassis;
@@ -54,6 +58,6 @@ void chassisInit(void);
 void chassisAngleRing(void);
 void chassisSetState(float vx, float vy, float targetAngle);
 void chassisGetPosition(void);
-
+void chassisSetSpeed(float vx, float vy, float angularVelocity);
 
 #endif

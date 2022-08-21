@@ -76,7 +76,7 @@ void usart2Init(u32 baud)
 	NVIC_InitTypeDef NVIC_USART2;
 	NVIC_USART2.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_USART2.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_USART2.NVIC_IRQChannelPreemptionPriority = 2; //抢占优先级
+	NVIC_USART2.NVIC_IRQChannelPreemptionPriority = 1; //抢占优先级
 	NVIC_USART2.NVIC_IRQChannelSubPriority = 0; //响应优先级
 	NVIC_Init(&NVIC_USART2);
 	

@@ -1,46 +1,44 @@
 #include <stm32f10x.h>
-#include "LED.h"
 #include "grayScaleSensor.h"
 #include "gyro.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "uart.h"
-#include "can.h"
-#include "motor3508.h"
-#include "key.h"
 #include "chassis.h"
-#include "cycleArray.h"
+#include "linetracker.h"
 
 int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	
 	u8 res;
+	u16 gray_res;
 	char command[100];
 	char buff[100];
 	u8 commandCnt = 0;
 	u8 commandFinish = 0;
+	
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
-	//KEY_Init();
+	//usart1Init(115200);
 	usart2Init(115200);
-	//u32 time = 0;
-	motorInit();
-	//LEDInit();
-	chassisInit();
-	//grayScaleSensor2_Init();
-	
-	usart1Init(115200);
 	uart4Init(115200);
+	motorInit();
+	chassisInit();
+	grayScaleSensor2_Init();
+	angle_match_init();
+	translationSpeed_match_init();
 	
-	LED0(0);
-	LED1(0);
+	float world_speed = 0;
+	float world_angle = 0;
+	float body_angularVelocity = 0, body_angularVelocity_increase = 0;
+	float body_speed_x = 0, body_speed_y = 0, body_speed_increase = 0;
 	
-	int speed = 0;
-	float angle = 0;
+	u8 linetracker_switch = 0;
+	u8 translation_linetracker_switch = 0;
+	u8 control_mode = 0; //0 : ‰∏ñÁïåÂùêÊ†á  1 : Êú∫Âô®‰∫∫ÂùêÊ†á
 	
-	
-	
-	u16 i;
+	int i;
 	
 	for(i = 0; i < 10000; i++)
 	{
@@ -48,12 +46,13 @@ int main(void)
 		chassis.angle = 0;
 		chassis.lastAngle = 361;
 		chassis.numOfTurns = 0;
+		grayScaleSensor_id = 10;
+		lineTrackerAngle = 0;
+		lineTrackerSpeed = 0;
 	}
 	
 	while(1)
 	{
-		//uart1_send("123");
-		//uart4_send("123");
 		while(1)
 		{
 			if(uart4_read(&res) == 1)
@@ -78,21 +77,148 @@ int main(void)
 		}
 		if(commandFinish == 1)
 		{
-			if(strcmp(command, "W") == 0)
+			uart4_send(command);
+			uart4_send("\n");
+			commandFinish = 0;
+			
+			if(strcmp(command, "world") == 0)
 			{
-				chassisSetState(0, speed, angle);
+				control_mode = 0;
 			}
-			else if(strcmp(command, "S") == 0)
+			else if(strcmp(command, "body") == 0)
 			{
-				chassisSetState(0, -speed, angle);
+				control_mode = 1;
+				chassisSetSpeed(0, 0 ,0);
 			}
-			else if(strcmp(command, "A") == 0)
+			else if(strcmp(command, "UP") == 0)
 			{
-				chassisSetState(-speed, 0, angle);
+				if(control_mode == 1)
+				{
+					body_speed_y += body_speed_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, world_speed, world_angle);
+				}
 			}
-			else if(strcmp(command, "D") == 0)
+			else if(strcmp(command, "up") == 0)
 			{
-				chassisSetState(speed, 0, angle);
+				if(control_mode == 1)
+				{
+					body_speed_y -= body_speed_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+			}
+			else if(strcmp(command, "DOWN") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_speed_y -= body_speed_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, -world_speed, world_angle);
+				}
+			}
+			else if(strcmp(command, "down") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_speed_y += body_speed_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+			}
+			else if(strcmp(command, "LEFT") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_angularVelocity += body_angularVelocity_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(-world_speed, 0, world_angle);
+				}
+			}
+			else if(strcmp(command, "left") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_angularVelocity -= body_angularVelocity_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+			}
+			else if(strcmp(command, "RIGHT") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_angularVelocity -= body_angularVelocity_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(world_speed, 0, world_angle);
+				}
+			}
+			else if(strcmp(command, "right") == 0)
+			{
+				if(control_mode == 1)
+				{
+					body_angularVelocity += body_angularVelocity_increase;
+					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+			}
+			else if(strcmp(command, "linetracker") == 0)
+			{
+				grayScaleSensor_id = 10;
+				linetracker_switch = !linetracker_switch;
+				translation_linetracker_switch = 0;
+				control_mode = 0;
+				if(linetracker_switch)
+				{
+					uart4_send("linetracker on\n");
+				}
+				else
+				{
+					uart4_send("line tracker off\n");
+					if(control_mode == 0)
+					{
+						chassisSetState(0, 0, chassis.angle);
+					}
+					else
+					{
+						chassisSetSpeed(0, 0, 0);
+					}
+					linetracker_switch = 0;
+					translation_linetracker_switch = 0;
+				}
+			}
+			else if(strcmp(command, "translation linetracker") == 0)
+			{
+				grayScaleSensor_id = 10;
+				translation_linetracker_switch = !translation_linetracker_switch;
+				linetracker_switch = 0;
+				control_mode = 0;
+				if(translation_linetracker_switch)
+				{
+					uart4_send("translation tracker on\n");
+				}
+				else
+				{
+					uart4_send("translation tracker off\n");
+					if(control_mode == 0)
+					{
+						chassisSetState(0, 0, chassis.angle);
+					}
+					else
+					{
+						chassisSetSpeed(0, 0, 0);
+					}
+					linetracker_switch = 0;
+					translation_linetracker_switch = 0;
+				}
 			}
 			else if(strcmp(command, "reset") == 0)
 			{
@@ -100,10 +226,19 @@ int main(void)
 				chassis.angle = 0;
 				chassis.lastAngle = 361;
 				chassis.numOfTurns = 0;
+				grayScaleSensor_id = 10;
+				lineTrackerAngle = 0;
+				lineTrackerSpeed = 0;
 			}
 			else if(strstr(command, "speed") != NULL)
 			{
-				speed = atoi(command + 5);
+				world_speed = atof(command + 5);
+				lineTrackerSpeed = world_speed;
+				body_speed_increase = world_speed;
+			}
+			else if(strstr(command, "angularVelocity") != NULL)
+			{
+				body_angularVelocity_increase = atof(command + 15);
 			}
 			else if(strcmp(command, "angle") == 0)
 			{
@@ -112,16 +247,47 @@ int main(void)
 			} 
 			else if(strstr(command, "angle") != NULL)
 			{
-				angle = atof(command + 5);
-				chassisSetState(0, 0, angle);
+				world_angle = atof(command + 5);
+				chassisSetState(0, 0, world_angle);
+				lineTrackerAngle = world_angle;
+			}
+			else if(strstr(command, "gray") != NULL)
+			{
+				gray_res = grayScaleSensor2_Read();
+				for(i = 0; i < 11; i++)
+				{
+					if((gray_res & (1 << i)) != 0)
+					{
+						uart4_send("1");
+					}
+					else
+					{
+						uart4_send("0");
+					}
+				}
+				uart4_send("\n");
 			}
 			else
 			{
-				chassisSetState(0, 0, angle);
+				if(control_mode == 0)
+				{
+					chassisSetState(0, 0, chassis.angle);
+				}
+				else
+				{
+					chassisSetSpeed(0, 0, 0);
+				}
+				linetracker_switch = 0;
+				translation_linetracker_switch = 0;
 			}
-			uart4_send(command);
-			uart4_send("\n");
-			commandFinish = 0;
+		}
+		if(linetracker_switch == 1) 
+		{
+			linetracker();
+		}
+		if(translation_linetracker_switch == 1)
+		{
+			linetracker_translation();
 		}
 		
 		//grayScaleSensor_Send();  //ª“∂»¥´∏–∆˜∑¢ÀÕ ˝æ›

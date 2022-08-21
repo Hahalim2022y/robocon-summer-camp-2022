@@ -33,6 +33,8 @@ typedef struct Motor3508_
 	//目标rpm
 	float targetRpm;
 	
+	float smoothTargetRpm;
+	
 	PidStruct pid;
 	
 	//标志是否已经接收到了数据

@@ -54,3 +54,52 @@ u8 cycleArray_pop(CycleArray *fifo)
 //    else
 //        return (fifo->size - fifo->out + fifo->in);
 //}
+
+void fCycleArray_init(FCycleArray *ca)
+{
+    ca->head = 0;
+	ca->tail = 0;
+}
+
+u8 fCycleArray_isEmpty(FCycleArray *ca)
+{
+	if(ca->head == ca->tail)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void fCycleArray_push(FCycleArray *ca, float data)
+{
+	ca->data[ca->tail] = data;
+	ca->tail++;
+	ca->tail = ca->tail % FCYCLEARRAY_SIZE;
+	if(ca->tail == ca->head) 
+	{
+		ca->head++;
+		ca->head = ca->head % FCYCLEARRAY_SIZE;
+	}
+}
+
+float fCycleArray_pop(FCycleArray *ca)
+{
+	float data = 0;
+	if(fCycleArray_isEmpty(ca) == 0)
+	{
+		data = ca->data[ca->head];
+		ca->head++;
+		ca->head = ca->head % FCYCLEARRAY_SIZE;
+	}
+	return data;
+}
+
+int fCycleArray_len(FCycleArray *ca)
+{
+	int res = ca->tail - ca->head;
+	while(res < 0) res += FCYCLEARRAY_SIZE;
+	return res;
+}

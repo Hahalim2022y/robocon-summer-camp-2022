@@ -6,7 +6,19 @@ Motor3508 motor[3];
 void motorSpeedRing(u8 id)
 {
 	long targetCurrent;
-	targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].targetRpm, motor[id].rpm);
+	if(motor[id].smoothTargetRpm < motor[id].targetRpm - 0.2)
+	{
+		motor[id].smoothTargetRpm += 0.2;
+	}
+	else if(motor[id].smoothTargetRpm > motor[id].targetRpm + 0.2)
+	{
+		motor[id].smoothTargetRpm -= 0.2;
+	}
+	else
+	{
+		motor[id].smoothTargetRpm = motor[id].targetRpm;
+	}
+	targetCurrent = (long)pidOutput(&(motor[id].pid), motor[id].smoothTargetRpm, motor[id].rpm);
 	if(targetCurrent < -16384) targetCurrent = -16384;
 	if(targetCurrent > 16384) targetCurrent = 16384;
 	can_motor_send_databuff[0 + id * 2] = targetCurrent >> 8;
@@ -34,6 +46,7 @@ void motorSendCurrent(void)
 	for(i = 0; i < 8; i++)
 	{
 		TxMessage.Data[i] = can_motor_send_databuff[i];
+		//TxMessage.Data[i] = 0;
 	}
 	
 	mbox = CAN_Transmit(CAN1, &TxMessage);   
@@ -61,7 +74,8 @@ void motorInit(void)
 		motor[i].angle = 0;
 		motor[i].rpm = 0;
 		motor[i].dataReceived = 0;
-		pidInit(&motor[i].pid, 20, 0.2, 400);
+		pidInit(&motor[i].pid, 50, 0.2, 400);
+		motor[i].smoothTargetRpm = 0;
 	}
 }
 
@@ -86,7 +100,7 @@ void motorGetData(u8 i)
 	motor[i].oriLastAngle = motor[i].oriAngle;
 
 	motor[i].LastabsolutAngle = motor[i].absolutAngle;	
-	motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].oriAngle;
+	motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].angle;
 
 	
 	motor[i].oriRpm = 0;
