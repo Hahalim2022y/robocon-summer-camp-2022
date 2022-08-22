@@ -205,7 +205,7 @@ u8 uart4_read(u8 *buff)
 void USART1_IRQHandler(void)
 {
 	u8 res;
-	if(USART_GetITStatus(USART2, USART_IT_RXNE)) //必须是RXNE才能继续
+	if(USART_GetITStatus(USART1, USART_IT_RXNE)) //必须是RXNE才能继续
 	{
 		res = USART_ReceiveData(USART1);
 		cycleArray_push(&uart1_fifo, res);

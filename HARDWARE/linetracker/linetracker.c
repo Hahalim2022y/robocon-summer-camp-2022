@@ -23,7 +23,7 @@ void linetracker(void)
 		}
 	}
 	
-	if(lightNum != 0)
+	if(lightNum > 0 && lightNum <= 4)
 	{
 		grayScaleSensor_id = sum / lightNum;
 		sum = 0;
@@ -31,6 +31,13 @@ void linetracker(void)
 	}
 	else
 	{
+		float angle = chassis.angle;
+		float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
+		float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
+		if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
+			|| (vx == 0 && vy == 0)) return;
+		
+		chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
 		return;
 	}
 	
@@ -93,7 +100,7 @@ void linetracker_translation(void)
 		}
 	}
 	
-	if(lightNum != 0)
+	if(lightNum > 0 && lightNum <= 4)
 	{
 		grayScaleSensor_id = sum / lightNum;
 		sum = 0;
@@ -101,6 +108,18 @@ void linetracker_translation(void)
 	}
 	else
 	{
+		float angle = chassis.angle;
+	
+		float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
+				+ translationSpeed_match[grayScaleSensor_id] * cosf(angle / 180 * 3.14159);
+	
+		float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159)
+				+ translationSpeed_match[grayScaleSensor_id] * sinf(angle / 180 * 3.14159);
+		
+		if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
+			|| (vx == 0 && vy == 0)) return;
+		
+		chassisSetState(vx, vy, lineTrackerAngle);
 		return;
 	}
 	
@@ -162,52 +181,52 @@ void linetracker_translation(void)
 
 void angle_match_init(void)
 {
-	angle_match[0] = 19;
-	angle_match[1] = 17;
-	angle_match[2] = 15;
-	angle_match[3] = 13;
-	angle_match[4] = 11;
-	angle_match[5] = 9;
-	angle_match[6] = 7;
+	angle_match[0] = 15.5;
+	angle_match[1] = 14;
+	angle_match[2] = 12.5;
+	angle_match[3] = 11;
+	angle_match[4] = 9.5;
+	angle_match[5] = 8;
+	angle_match[6] = 6.5;
 	angle_match[7] = 5;
-	angle_match[8] = 3;
-	angle_match[9] = 1;
+	angle_match[8] = 3.5;
+	angle_match[9] = 2;
 	angle_match[10] = 0;
-	angle_match[11] = -1;
-	angle_match[12] = -3;
+	angle_match[11] = -2;
+	angle_match[12] = -3.5;
 	angle_match[13] = -5;
-	angle_match[14] = -7;
-	angle_match[15] = -9;
-	angle_match[16] = -11;
-	angle_match[17] = -13;
-	angle_match[18] = -15;
-	angle_match[19] = -17;
-	angle_match[20] = -19;
+	angle_match[14] = -6.5;
+	angle_match[15] = -8;
+	angle_match[16] = -9.5;
+	angle_match[17] = -11;
+	angle_match[18] = -12.5;
+	angle_match[19] = -14;
+	angle_match[20] = -15.5;
 }
 
 void translationSpeed_match_init(void)
 {
-	translationSpeed_match[0] = -350;
-	translationSpeed_match[1] = -315;
-	translationSpeed_match[2] = -280;
-	translationSpeed_match[3] = -245;
-	translationSpeed_match[4] = -210;
-	translationSpeed_match[5] = -175;
-	translationSpeed_match[6] = -140;
-	translationSpeed_match[7] = -105;
-	translationSpeed_match[8] = -70;
-	translationSpeed_match[9] = -35;
+	translationSpeed_match[0] = -450;
+	translationSpeed_match[1] = -405;
+	translationSpeed_match[2] = -360;
+	translationSpeed_match[3] = -315;
+	translationSpeed_match[4] = -270;
+	translationSpeed_match[5] = -225;
+	translationSpeed_match[6] = -180;
+	translationSpeed_match[7] = -135;
+	translationSpeed_match[8] = -90;
+	translationSpeed_match[9] = -45;
 	translationSpeed_match[10] = 0;
-	translationSpeed_match[11] = 35;
-	translationSpeed_match[12] = 70;
-	translationSpeed_match[13] = 105;
-	translationSpeed_match[14] = 140;
-	translationSpeed_match[15] = 175;
-	translationSpeed_match[16] = 210;
-	translationSpeed_match[17] = 245;
-	translationSpeed_match[18] = 280;
-	translationSpeed_match[19] = 315;
-	translationSpeed_match[20] = 350;
+	translationSpeed_match[11] = 45;
+	translationSpeed_match[12] = 90;
+	translationSpeed_match[13] = 135;
+	translationSpeed_match[14] = 180;
+	translationSpeed_match[15] = 225;
+	translationSpeed_match[16] = 270;
+	translationSpeed_match[17] = 315;
+	translationSpeed_match[18] = 360;
+	translationSpeed_match[19] = 405;
+	translationSpeed_match[20] = 450;
 }
 
 // void angularVelocity_match_init(void)

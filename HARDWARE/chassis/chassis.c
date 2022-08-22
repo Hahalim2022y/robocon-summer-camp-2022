@@ -66,11 +66,11 @@ void chassisAngleRing(void)
 		chassis.smoothTargetAngle = (angle + numOfTurns * 360.0);
 	}
 	
-	if(chassis.smoothTargetAngle < chassis.targetAngle - 0.8)
+	if(chassis.smoothTargetAngle < chassis.targetAngle - 1.0)
 	{
 		chassis.smoothTargetAngle += 0.8;
 	}
-	else if(chassis.smoothTargetAngle > chassis.targetAngle + 0.8)
+	else if(chassis.smoothTargetAngle > chassis.targetAngle + 1.0)
 	{
 		chassis.smoothTargetAngle -= 0.8;
 	}
