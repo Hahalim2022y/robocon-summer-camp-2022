@@ -176,6 +176,19 @@ void uart4_send(char str[])
 	}
 }
 
+u8 uart1_read(u8 *buff)
+{
+	if(cycleArray_isEmpty(&uart1_fifo) == 0)
+	{
+		*buff = cycleArray_pop(&uart1_fifo);
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 u8 uart2_read(u8 *buff)
 {
 	if(cycleArray_isEmpty(&uart2_fifo) == 0)

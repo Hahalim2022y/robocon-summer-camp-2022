@@ -14,6 +14,10 @@ void linetracker(void)
 	int sum = 0;
 	int lightNum = 0;
 	
+	float angle = 0;
+	float vx = 0;
+	float vy = 0;
+	
 	for(i = 0; i < 11; i++)
 	{
 		if((res & (1 << i)) != 0)
@@ -31,13 +35,20 @@ void linetracker(void)
 	}
 	else
 	{
-		float angle = chassis.angle;
-		float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
-		float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
+		angle = chassis.angle;
+		vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
+		vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
 		if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
 			|| (vx == 0 && vy == 0)) return;
 		
-		chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
+		if(4 <= grayScaleSensor_id && grayScaleSensor_id <= 16)
+		{
+			chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
+		}
+		else
+		{
+			chassisSetState(vx / 3, vy / 3, angle + angle_match[grayScaleSensor_id]);
+		}
 		return;
 	}
 	
@@ -75,9 +86,9 @@ void linetracker(void)
 		return;
 	}
 	
-	float angle = chassis.angle;
-	float vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
-	float vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
+	angle = chassis.angle;
+	vx = -lineTrackerSpeed * sinf(angle / 180 * 3.14159);
+	vy = lineTrackerSpeed * cosf(angle / 180 * 3.14159);
 	if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
 		|| (vx == 0 && vy == 0)) return;
 	
@@ -181,27 +192,27 @@ void linetracker_translation(void)
 
 void angle_match_init(void)
 {
-	angle_match[0] = 15.5;
-	angle_match[1] = 14;
-	angle_match[2] = 12.5;
-	angle_match[3] = 11;
-	angle_match[4] = 9.5;
-	angle_match[5] = 8;
-	angle_match[6] = 6.5;
-	angle_match[7] = 5;
-	angle_match[8] = 3.5;
-	angle_match[9] = 2;
+	angle_match[0] = 21;
+	angle_match[1] = 17.5;
+	angle_match[2] = 16.1;
+	angle_match[3] = 14.1;
+	angle_match[4] = 13.1;
+	angle_match[5] = 11;
+	angle_match[6] = 8.9;
+	angle_match[7] = 6.8;
+	angle_match[8] = 4.1;
+	angle_match[9] = 2.3;
 	angle_match[10] = 0;
-	angle_match[11] = -2;
-	angle_match[12] = -3.5;
-	angle_match[13] = -5;
-	angle_match[14] = -6.5;
-	angle_match[15] = -8;
-	angle_match[16] = -9.5;
-	angle_match[17] = -11;
-	angle_match[18] = -12.5;
-	angle_match[19] = -14;
-	angle_match[20] = -15.5;
+	angle_match[11] = -2.3;
+	angle_match[12] = -4.1;
+	angle_match[13] = -6.8;
+	angle_match[14] = -8.9;
+	angle_match[15] = -11;
+	angle_match[16] = -13.1;
+	angle_match[17] = -14.1;
+	angle_match[18] = -16.1;
+	angle_match[19] = -17.5;
+	angle_match[20] = -21;
 }
 
 void translationSpeed_match_init(void)

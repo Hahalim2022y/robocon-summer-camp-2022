@@ -74,7 +74,7 @@ void motorInit(void)
 		motor[i].angle = 0;
 		motor[i].rpm = 0;
 		motor[i].dataReceived = 0;
-		pidInit(&motor[i].pid, 50, 0.2, 400);
+		pidInit(&motor[i].pid, 70, 0.04, 400);
 		motor[i].smoothTargetRpm = 0;
 	}
 }

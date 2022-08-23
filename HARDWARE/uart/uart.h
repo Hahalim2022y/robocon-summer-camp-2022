@@ -16,6 +16,7 @@ void uart1_send(char str[]);
 void uart2_send(char str[]);
 void uart4_send(char str[]);
 
+u8 uart1_read(u8 *buff);
 u8 uart2_read(u8 *buff);
 u8 uart4_read(u8 *buff);
 
