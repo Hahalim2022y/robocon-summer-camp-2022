@@ -353,9 +353,21 @@ int main(void)
 			{
 				uart1_send("flipped\r\n");
 			}
-			else if(strstr(command, "auto start") != NULL)
+			else if(strstr(command, "auto left") != NULL)
 			{
 				auto_grab_ball = 1;
+				linetracker_switch = 0;
+				translation_linetracker_switch = 0;
+//				pidInit(&(motor[0].pid), 70, 0, 400);
+//				pidInit(&(motor[1].pid), 70, 0, 400);
+//				pidInit(&(motor[2].pid), 70, 0, 400);
+				motor[0].pid.ki = 0;
+				motor[1].pid.ki = 0;
+				motor[2].pid.ki = 0;
+			}
+			else if(strstr(command, "auto right") != NULL)
+			{
+				auto_grab_ball = 3;
 				linetracker_switch = 0;
 				translation_linetracker_switch = 0;
 //				pidInit(&(motor[0].pid), 70, 0, 400);
@@ -406,8 +418,15 @@ int main(void)
 			}
 			
 			if(strcmp(f4_command, "turnback") == 0)
-			{
-				auto_grab_ball = 2;
+			{	
+				if(auto_grab_ball == 1)
+				{
+					auto_grab_ball = 2;
+				}
+				else if(auto_grab_ball == 3)
+				{
+					auto_grab_ball = 4;
+				}					
 			}
 		}
 		
@@ -424,14 +443,54 @@ int main(void)
 		{	
 			if(camp_color == 0)
 			{
+				chassisSetState(30, 150, -90);
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(-30, -150, 90);
+			}
+		}
+		if(auto_grab_ball == 2)
+		{
+			if(camp_color == 0)
+			{
+				chassisSetState(-150, -150, -90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, -90);
+				auto_grab_ball = 0;
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(150, 150, 90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, 90);
+				auto_grab_ball = 0;
+			}
+//			pidInit(&(motor[0].pid), 70, 0.04, 400);
+//			pidInit(&(motor[1].pid), 70, 0.04, 400);
+//			pidInit(&(motor[2].pid), 70, 0.04, 400);
+			motor[0].pid.ki = 0.04;
+			motor[1].pid.ki = 0.04;
+			motor[2].pid.ki = 0.04;
+			motor[0].pid.error_sum = 0;
+			motor[1].pid.error_sum = 0;
+			motor[2].pid.error_sum = 0;
+		}
+		
+		if(auto_grab_ball == 3)
+		{	
+			if(camp_color == 0)
+			{
 				chassisSetState(30, -150, -90);
 			}
 			else if(camp_color == 1)
 			{
-				chassisSetState(-15, -150, 90);
+				chassisSetState(-30, 150, 90);
 			}
 		}
-		if(auto_grab_ball == 2)
+		if(auto_grab_ball == 4)
 		{
 			if(camp_color == 0)
 			{
@@ -443,7 +502,7 @@ int main(void)
 			}
 			else if(camp_color == 1)
 			{
-				chassisSetState(150, 150, 90);
+				chassisSetState(150, -150, 90);
 				delay_ms(4000);
 				uart1_send("flipped\r\n");
 				chassisSetState(0, 0, 90);

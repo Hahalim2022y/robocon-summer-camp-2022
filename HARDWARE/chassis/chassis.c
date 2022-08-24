@@ -92,7 +92,7 @@ void chassisAngleRing(void)
 
 void chassisInit(void)
 {
-	pidInit(&(chassis.AngleRing_pid), 2.2, 0.00001, 10.0);// 0.45, 0.00012, 10.0
+	pidInit(&(chassis.AngleRing_pid), 2.5, 0.0000005, 10.0);// 0.45, 0.00012, 10.0
 	//chassis.world_x = 0;
 	//chassis.world_y = 0;
 	chassis.angle = 0;
