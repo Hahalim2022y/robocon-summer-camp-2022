@@ -7,6 +7,7 @@
 #include "uart.h"
 #include "chassis.h"
 #include "linetracker.h"
+#include "delay.h"
 
 int main(void)
 {
@@ -19,8 +20,12 @@ int main(void)
 	u8 commandCnt = 0;
 	u8 commandFinish = 0;
 	
+	char f4_command[100];
+	u8 f4_commandCnt = 0;
+	u8 f4_commandFinish = 0;
+	
 	can_init(CAN_SJW_1tq, CAN_BS2_2tq, CAN_BS1_3tq, 6, CAN_Mode_Normal);
-	//usart1Init(115200);
+	usart1Init(115200);
 	usart2Init(115200);
 	uart4Init(115200);
 	motorInit();
@@ -28,6 +33,7 @@ int main(void)
 	grayScaleSensor2_Init();
 	angle_match_init();
 	translationSpeed_match_init();
+	delay_init();
 	
 	float world_speed = 0;
 	float world_angle = 0;
@@ -37,6 +43,8 @@ int main(void)
 	u8 linetracker_switch = 0;
 	u8 translation_linetracker_switch = 0;
 	u8 control_mode = 0; //0 : 世界坐标  1 : 机器人坐标
+	u8 camp_color = 0; //0 : 蓝色  1 : 粉色
+	u8 auto_grab_ball = 0; //0 : 手动操作和巡线  1 : 顶墙  2 : 后退  3 : 平移  4 : 顶板  5 : 平移  6 : 回撤
 	
 	int i;
 	
@@ -75,6 +83,30 @@ int main(void)
 			}
 			commandCnt++;
 		}
+		
+		while(1)
+		{
+			if(uart1_read(&res) == 1)
+			{
+				if(res != '\n')
+				{
+					f4_command[f4_commandCnt] = res;
+				}
+				else
+				{
+					f4_command[f4_commandCnt] = '\0';
+					f4_commandFinish = 1;
+					f4_commandCnt = 0;
+					break;
+				}
+			}
+			else
+			{
+				break;
+			}
+			f4_commandCnt++;
+		}
+		
 		if(commandFinish == 1)
 		{
 			uart4_send(command);
@@ -99,7 +131,14 @@ int main(void)
 				}
 				else
 				{
-					chassisSetState(0, world_speed, world_angle);
+					if(camp_color == 0)
+					{
+						chassisSetState(-world_speed, 0, world_angle);
+					}
+					else if(camp_color == 1)
+					{
+						chassisSetState(world_speed, 0, world_angle);
+					}
 				}
 			}
 			else if(strcmp(command, "up") == 0)
@@ -108,6 +147,10 @@ int main(void)
 				{
 					body_speed_y -= body_speed_increase;
 					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, 0, world_angle);
 				}
 			}
 			else if(strcmp(command, "DOWN") == 0)
@@ -119,7 +162,14 @@ int main(void)
 				}
 				else
 				{
-					chassisSetState(0, -world_speed, world_angle);
+					if(camp_color == 0)
+					{
+						chassisSetState(world_speed, 0, world_angle);
+					}
+					else if(camp_color == 1)
+					{
+						chassisSetState(-world_speed, 0, world_angle);
+					}
 				}
 			}
 			else if(strcmp(command, "down") == 0)
@@ -128,6 +178,10 @@ int main(void)
 				{
 					body_speed_y += body_speed_increase;
 					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, 0, world_angle);
 				}
 			}
 			else if(strcmp(command, "LEFT") == 0)
@@ -139,7 +193,14 @@ int main(void)
 				}
 				else
 				{
-					chassisSetState(-world_speed, 0, world_angle);
+					if(camp_color == 0)
+					{
+						chassisSetState(0, -world_speed, world_angle);
+					}
+					else if(camp_color == 1)
+					{
+						chassisSetState(0, world_speed, world_angle);
+					}
 				}
 			}
 			else if(strcmp(command, "left") == 0)
@@ -148,6 +209,10 @@ int main(void)
 				{
 					body_angularVelocity -= body_angularVelocity_increase;
 					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
+				}
+				else
+				{
+					chassisSetState(0, 0, world_angle);
 				}
 			}
 			else if(strcmp(command, "RIGHT") == 0)
@@ -159,7 +224,14 @@ int main(void)
 				}
 				else
 				{
-					chassisSetState(world_speed, 0, world_angle);
+					if(camp_color == 0)
+					{
+						chassisSetState(0, world_speed, world_angle);
+					}
+					else if(camp_color == 1)
+					{
+						chassisSetState(0, -world_speed, world_angle);
+					}
 				}
 			}
 			else if(strcmp(command, "right") == 0)
@@ -169,12 +241,17 @@ int main(void)
 					body_angularVelocity += body_angularVelocity_increase;
 					chassisSetSpeed(body_speed_x, body_speed_y, body_angularVelocity);
 				}
+				else
+				{
+					chassisSetState(0, 0, world_angle);
+				}
 			}
 			else if(strcmp(command, "linetracker") == 0)
 			{
 				grayScaleSensor_id = 10;
 				linetracker_switch = !linetracker_switch;
 				translation_linetracker_switch = 0;
+				auto_grab_ball = 0;
 				control_mode = 0;
 				if(linetracker_switch)
 				{
@@ -200,6 +277,7 @@ int main(void)
 				grayScaleSensor_id = 10;
 				translation_linetracker_switch = !translation_linetracker_switch;
 				linetracker_switch = 0;
+				auto_grab_ball = 0;
 				control_mode = 0;
 				if(translation_linetracker_switch)
 				{
@@ -267,6 +345,46 @@ int main(void)
 				}
 				uart4_send("\n");
 			}
+			else if(strstr(command, "putdown") != NULL)
+			{
+				uart1_send("putdown\r\n");
+			}
+			else if(strstr(command, "flipped") != NULL)
+			{
+				uart1_send("flipped\r\n");
+			}
+			else if(strstr(command, "auto left") != NULL)
+			{
+				auto_grab_ball = 1;
+				linetracker_switch = 0;
+				translation_linetracker_switch = 0;
+//				pidInit(&(motor[0].pid), 70, 0, 400);
+//				pidInit(&(motor[1].pid), 70, 0, 400);
+//				pidInit(&(motor[2].pid), 70, 0, 400);
+				motor[0].pid.ki = 0;
+				motor[1].pid.ki = 0;
+				motor[2].pid.ki = 0;
+			}
+			else if(strstr(command, "auto right") != NULL)
+			{
+				auto_grab_ball = 3;
+				linetracker_switch = 0;
+				translation_linetracker_switch = 0;
+//				pidInit(&(motor[0].pid), 70, 0, 400);
+//				pidInit(&(motor[1].pid), 70, 0, 400);
+//				pidInit(&(motor[2].pid), 70, 0, 400);
+				motor[0].pid.ki = 0;
+				motor[1].pid.ki = 0;
+				motor[2].pid.ki = 0;
+			}
+			else if(strstr(command, "blue") != NULL)
+			{
+				camp_color = 0;
+			}
+			else if(strstr(command, "pink") != NULL)
+			{
+				camp_color = 1;
+			}
 			else
 			{
 				if(control_mode == 0)
@@ -279,8 +397,39 @@ int main(void)
 				}
 				linetracker_switch = 0;
 				translation_linetracker_switch = 0;
+				//chassis.AngleRing_pid.error_sum = 0;
+				body_speed_x = 0;
+				body_speed_y = 0;
+				body_angularVelocity = 0;
+				auto_grab_ball = 0;
+				//pidInit(&(motor[0].pid), 70, 0.04, 400);
+				//pidInit(&(motor[1].pid), 70, 0.04, 400);
+				//pidInit(&(motor[2].pid), 70, 0.04, 400);
 			}
 		}
+		
+		if(f4_commandFinish == 1)
+		{
+			f4_commandFinish = 0;
+			if(auto_grab_ball == 0)
+			{
+				uart4_send(f4_command);
+				uart4_send("\n");
+			}
+			
+			if(strcmp(f4_command, "turnback") == 0)
+			{	
+				if(auto_grab_ball == 1)
+				{
+					auto_grab_ball = 2;
+				}
+				else if(auto_grab_ball == 3)
+				{
+					auto_grab_ball = 4;
+				}					
+			}
+		}
+		
 		if(linetracker_switch == 1) 
 		{
 			linetracker();
@@ -290,6 +439,84 @@ int main(void)
 			linetracker_translation();
 		}
 		
-		//grayScaleSensor_Send();  //�Ҷȴ�������������
+		if(auto_grab_ball == 1)
+		{	
+			if(camp_color == 0)
+			{
+				chassisSetState(30, 150, -90);
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(-30, -150, 90);
+			}
+		}
+		if(auto_grab_ball == 2)
+		{
+			if(camp_color == 0)
+			{
+				chassisSetState(-150, -150, -90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, -90);
+				auto_grab_ball = 0;
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(150, 150, 90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, 90);
+				auto_grab_ball = 0;
+			}
+//			pidInit(&(motor[0].pid), 70, 0.04, 400);
+//			pidInit(&(motor[1].pid), 70, 0.04, 400);
+//			pidInit(&(motor[2].pid), 70, 0.04, 400);
+			motor[0].pid.ki = 0.04;
+			motor[1].pid.ki = 0.04;
+			motor[2].pid.ki = 0.04;
+			motor[0].pid.error_sum = 0;
+			motor[1].pid.error_sum = 0;
+			motor[2].pid.error_sum = 0;
+		}
+		
+		if(auto_grab_ball == 3)
+		{	
+			if(camp_color == 0)
+			{
+				chassisSetState(30, -150, -90);
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(-30, 150, 90);
+			}
+		}
+		if(auto_grab_ball == 4)
+		{
+			if(camp_color == 0)
+			{
+				chassisSetState(-150, 150, -90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, -90);
+				auto_grab_ball = 0;
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(150, -150, 90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, 90);
+				auto_grab_ball = 0;
+			}
+//			pidInit(&(motor[0].pid), 70, 0.04, 400);
+//			pidInit(&(motor[1].pid), 70, 0.04, 400);
+//			pidInit(&(motor[2].pid), 70, 0.04, 400);
+			motor[0].pid.ki = 0.04;
+			motor[1].pid.ki = 0.04;
+			motor[2].pid.ki = 0.04;
+			motor[0].pid.error_sum = 0;
+			motor[1].pid.error_sum = 0;
+			motor[2].pid.error_sum = 0;
+		}
 	}
 }
