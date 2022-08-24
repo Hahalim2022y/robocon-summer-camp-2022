@@ -6,11 +6,11 @@ Motor3508 motor[3];
 void motorSpeedRing(u8 id)
 {
 	long targetCurrent;
-	if(motor[id].smoothTargetRpm < motor[id].targetRpm - 0.2)
+	if(motor[id].smoothTargetRpm <= motor[id].targetRpm - 0.2)
 	{
 		motor[id].smoothTargetRpm += 0.2;
 	}
-	else if(motor[id].smoothTargetRpm > motor[id].targetRpm + 0.2)
+	else if(motor[id].smoothTargetRpm >= motor[id].targetRpm + 0.2)
 	{
 		motor[id].smoothTargetRpm -= 0.2;
 	}
@@ -67,14 +67,14 @@ void motorInit(void)
 	{
 		motor[i].oriAngle = 0;
 		motor[i].oriLastAngle = 0xffff;
-		motor[i].absolutAngle = 0;
-		motor[i].LastabsolutAngle = 0;
+		//motor[i].absolutAngle = 0;
+		//motor[i].LastabsolutAngle = 0;
 		motor[i].oriRpm = 0;
 		motor[i].numOfTurns = 0;
 		motor[i].angle = 0;
 		motor[i].rpm = 0;
 		motor[i].dataReceived = 0;
-		pidInit(&motor[i].pid, 70, 0.04, 400);
+		pidInit(&motor[i].pid, 60, 0.04, 400);
 		motor[i].smoothTargetRpm = 0;
 	}
 }
@@ -99,8 +99,8 @@ void motorGetData(u8 i)
 	motor[i].angle = motor[i].oriAngle / 8191.0 * 360 / 3591 * 187;
 	motor[i].oriLastAngle = motor[i].oriAngle;
 
-	motor[i].LastabsolutAngle = motor[i].absolutAngle;	
-	motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].angle;
+	//motor[i].LastabsolutAngle = motor[i].absolutAngle;	
+	//motor[i].absolutAngle = (motor[i].numOfTurns * 360) / 3591 * 187 + motor[i].angle;
 
 	
 	motor[i].oriRpm = 0;

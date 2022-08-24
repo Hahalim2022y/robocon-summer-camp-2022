@@ -10,10 +10,10 @@ typedef struct Motor3508_
 	short numOfTurns;
 	
 	//电机旋转的绝对角度，可以超过360度
-	float absolutAngle;
+	//float absolutAngle;
 	
 	//电机上次的绝对角度，在USB_LP_CAN1_RX0_IRQHandler()无效，在其外有效
-	float LastabsolutAngle;
+	//float LastabsolutAngle;
 	
 	//接收到的原始角度数据
 	u16 oriAngle;

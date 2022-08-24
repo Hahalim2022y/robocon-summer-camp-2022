@@ -47,7 +47,7 @@ void linetracker(void)
 		}
 		else
 		{
-			chassisSetState(vx / 3, vy / 3, angle + angle_match[grayScaleSensor_id]);
+			chassisSetState(vx / 4, vy / 4, angle + angle_match[grayScaleSensor_id]);
 		}
 		return;
 	}
@@ -92,7 +92,14 @@ void linetracker(void)
 	if(angle > 500 || angle < -500 || vx > 1000 || vx < -1000 || vy > 1000 || vy < -1000 
 		|| (vx == 0 && vy == 0)) return;
 	
-	chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
+	if(6 <= grayScaleSensor_id && grayScaleSensor_id <= 14)
+	{
+		chassisSetState(vx, vy, angle + angle_match[grayScaleSensor_id]);
+	}
+	else
+	{
+		chassisSetState(vx / 2, vy / 2, angle + angle_match[grayScaleSensor_id]);
+	}
 }
 
 void linetracker_translation(void)
@@ -180,14 +187,6 @@ void linetracker_translation(void)
 		|| (vx == 0 && vy == 0)) return;
 	
 	chassisSetState(vx, vy, lineTrackerAngle);
-		
-//	chassisSetState(-lineTrackerSpeed * sinf(angle / 180 * 3.14159) 
-//		+ translationSpeed_match[grayScaleSensor_id] * cosf(angle / 180 * 3.14159)
-//	
-//		, lineTrackerSpeed * cosf(angle / 180 * 3.14159)
-//		+ translationSpeed_match[grayScaleSensor_id] * sinf(angle / 180 * 3.14159)
-//		
-//		, lineTrackerAngle);
 }
 
 void angle_match_init(void)

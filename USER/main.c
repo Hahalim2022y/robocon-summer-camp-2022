@@ -382,14 +382,14 @@ int main(void)
 				}
 				linetracker_switch = 0;
 				translation_linetracker_switch = 0;
-				chassis.AngleRing_pid.error_sum = 0;
+				//chassis.AngleRing_pid.error_sum = 0;
 				body_speed_x = 0;
 				body_speed_y = 0;
 				body_angularVelocity = 0;
 				auto_grab_ball = 0;
-				pidInit(&(motor[0].pid), 70, 0.04, 400);
-				pidInit(&(motor[1].pid), 70, 0.04, 400);
-				pidInit(&(motor[2].pid), 70, 0.04, 400);
+				//pidInit(&(motor[0].pid), 70, 0.04, 400);
+				//pidInit(&(motor[1].pid), 70, 0.04, 400);
+				//pidInit(&(motor[2].pid), 70, 0.04, 400);
 			}
 		}
 		
@@ -420,7 +420,7 @@ int main(void)
 		if(auto_grab_ball == 1)
 		{
 			
-			chassisSetState(10, -150, -90);
+			chassisSetState(20, -150, -90);
 		}
 		if(auto_grab_ball == 2)
 		{
