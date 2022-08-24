@@ -133,7 +133,7 @@ int main(void)
 				{
 					if(camp_color == 0)
 					{
-						chassisSetState(0, -world_speed, world_angle);
+						chassisSetState(-world_speed, 0, world_angle);
 					}
 					else if(camp_color == 1)
 					{
@@ -164,7 +164,7 @@ int main(void)
 				{
 					if(camp_color == 0)
 					{
-						chassisSetState(0, world_speed, world_angle);
+						chassisSetState(world_speed, 0, world_angle);
 					}
 					else if(camp_color == 1)
 					{
@@ -195,7 +195,7 @@ int main(void)
 				{
 					if(camp_color == 0)
 					{
-						chassisSetState(world_speed, 0, world_angle);
+						chassisSetState(0, -world_speed, world_angle);
 					}
 					else if(camp_color == 1)
 					{
@@ -226,7 +226,7 @@ int main(void)
 				{
 					if(camp_color == 0)
 					{
-						chassisSetState(-world_speed, 0, world_angle);
+						chassisSetState(0, world_speed, world_angle);
 					}
 					else if(camp_color == 1)
 					{
@@ -358,9 +358,12 @@ int main(void)
 				auto_grab_ball = 1;
 				linetracker_switch = 0;
 				translation_linetracker_switch = 0;
-				pidInit(&(motor[0].pid), 70, 0, 400);
-				pidInit(&(motor[1].pid), 70, 0, 400);
-				pidInit(&(motor[2].pid), 70, 0, 400);
+//				pidInit(&(motor[0].pid), 70, 0, 400);
+//				pidInit(&(motor[1].pid), 70, 0, 400);
+//				pidInit(&(motor[2].pid), 70, 0, 400);
+				motor[0].pid.ki = 0;
+				motor[1].pid.ki = 0;
+				motor[2].pid.ki = 0;
 			}
 			else if(strstr(command, "blue") != NULL)
 			{
@@ -418,20 +421,43 @@ int main(void)
 		}
 		
 		if(auto_grab_ball == 1)
-		{
-			
-			chassisSetState(20, -150, -90);
+		{	
+			if(camp_color == 0)
+			{
+				chassisSetState(30, -150, -90);
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(-15, -150, 90);
+			}
 		}
 		if(auto_grab_ball == 2)
 		{
-			chassisSetState(-150, 150, -90);
-			delay_ms(2000);
-			uart1_send("flipped\r\n");
-			chassisSetState(0, 0, -90);
-			auto_grab_ball = 0;
-			pidInit(&(motor[0].pid), 70, 0.04, 400);
-			pidInit(&(motor[1].pid), 70, 0.04, 400);
-			pidInit(&(motor[2].pid), 70, 0.04, 400);
+			if(camp_color == 0)
+			{
+				chassisSetState(-150, 150, -90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, -90);
+				auto_grab_ball = 0;
+			}
+			else if(camp_color == 1)
+			{
+				chassisSetState(150, 150, 90);
+				delay_ms(4000);
+				uart1_send("flipped\r\n");
+				chassisSetState(0, 0, 90);
+				auto_grab_ball = 0;
+			}
+//			pidInit(&(motor[0].pid), 70, 0.04, 400);
+//			pidInit(&(motor[1].pid), 70, 0.04, 400);
+//			pidInit(&(motor[2].pid), 70, 0.04, 400);
+			motor[0].pid.ki = 0.04;
+			motor[1].pid.ki = 0.04;
+			motor[2].pid.ki = 0.04;
+			motor[0].pid.error_sum = 0;
+			motor[1].pid.error_sum = 0;
+			motor[2].pid.error_sum = 0;
 		}
 	}
 }
